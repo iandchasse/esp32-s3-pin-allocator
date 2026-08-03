@@ -8,100 +8,98 @@
   :root{
     --bg:#0f1115; --panel:#171a21; --panel2:#1e222b; --border:#2a2f3a;
     --text:#e6e9ef; --muted:#98a1b3; --accent:#3b82f6;
-    /* class colors */
+    /* pin class colors */
     --c-power:#6b7280; --c-reset:#8b5cf6; --c-safe:#16a34a;
     --c-strap:#f59e0b; --c-psram:#dc2626; --c-usb:#2563eb;
-    /* function group colors */
-    --g-general:#0ea5e9; --g-analog:#a855f7; --g-i2c:#14b8a6; --g-spi:#f97316;
-    --g-sd:#eab308; --g-usb:#3b82f6; --g-buttons:#ec4899; --g-reserved:#6b7280;
   }
   *{box-sizing:border-box}
+  html,body{max-width:100%; overflow-x:hidden}
   body{
     margin:0; font:14px/1.4 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
     background:var(--bg); color:var(--text);
   }
   header{
-    padding:14px 20px; border-bottom:1px solid var(--border);
-    display:flex; align-items:center; gap:16px; flex-wrap:wrap;
+    padding:12px 16px; border-bottom:1px solid var(--border);
+    display:flex; align-items:center; gap:14px; flex-wrap:wrap;
   }
-  header h1{font-size:16px; margin:0; font-weight:650}
+  header h1{font-size:15px; margin:0; font-weight:650}
   header .sub{color:var(--muted); font-size:12px}
-  .toolbar{margin-left:auto; display:flex; gap:8px; flex-wrap:wrap}
+  .toolbar{margin-left:auto; display:flex; gap:7px; flex-wrap:wrap}
   button{
     background:var(--panel2); color:var(--text); border:1px solid var(--border);
-    padding:6px 11px; border-radius:6px; cursor:pointer; font-size:12.5px;
+    padding:6px 10px; border-radius:6px; cursor:pointer; font-size:12px;
   }
   button:hover{border-color:var(--accent)}
   button.active{background:var(--accent); border-color:var(--accent); color:#fff}
-  .layout{display:grid; grid-template-columns:minmax(0,1fr) 360px; gap:18px; padding:18px; align-items:start}
-  @media(max-width:1000px){.layout{grid-template-columns:1fr}}
+  .layout{display:grid; grid-template-columns:minmax(0,1fr) 370px; gap:16px; padding:16px; align-items:start}
+  @media(max-width:1000px){.layout{grid-template-columns:1fr; padding:12px}}
 
-  /* ---- module footprint ---- */
-  .board-wrap{background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:20px; overflow:auto}
+  /* ---------- module footprint (fully responsive, no scroll) ---------- */
+  .board-wrap{background:var(--panel); border:1px solid var(--border); border-radius:12px; padding:14px; overflow:hidden}
   .board{
-    display:grid; grid-template-columns:auto 1fr auto; grid-template-rows:auto auto;
-    gap:8px; min-width:640px; margin:0 auto; max-width:900px;
+    display:grid;
+    grid-template-columns:clamp(76px,19vw,180px) minmax(0,1fr) clamp(76px,19vw,180px);
+    grid-template-rows:auto auto;
+    gap:6px; width:100%; max-width:840px; margin:0 auto;
   }
-  .col{display:flex; flex-direction:column; gap:6px}
-  .col.left{grid-column:1; grid-row:1}
-  .col.right{grid-column:3; grid-row:1}
+  .col{grid-row:1; display:flex; flex-direction:column; gap:5px; min-width:0}
+  .col.left{grid-column:1}
+  .col.right{grid-column:3}
   .center{
-    grid-column:2; grid-row:1; display:flex; align-items:center; justify-content:center;
-    background:#0b0d11; border:2px dashed var(--border); border-radius:10px; margin:0 6px; min-height:120px;
+    grid-column:2; grid-row:1; display:flex; align-items:center; justify-content:center; text-align:center;
+    background:#0b0d11; border:2px dashed var(--border); border-radius:10px; margin:0 4px; min-height:90px; padding:8px; min-width:0;
   }
-  .center .chip{text-align:center; color:var(--muted)}
-  .center .chip b{display:block; color:var(--text); font-size:15px; letter-spacing:.5px}
-  .bottom{grid-column:2; grid-row:2; display:flex; gap:6px; justify-content:center; flex-wrap:nowrap; overflow-x:auto}
+  .center .chip{color:var(--muted); font-size:clamp(9px,2.4vw,12px)}
+  .center .chip b{display:block; color:var(--text); font-size:clamp(11px,2.9vw,15px); letter-spacing:.4px}
+  .bottom{grid-column:1 / -1; grid-row:2; display:flex; gap:4px; margin-top:2px}
 
-  /* ---- pins ---- */
+  /* ---------- pins ---------- */
   .pin{
-    position:relative; border:2px solid var(--border); border-radius:7px;
-    background:var(--panel2); cursor:pointer; user-select:none; padding:5px 7px;
-    display:flex; flex-direction:column; gap:1px; transition:transform .05s;
+    position:relative; border:2px solid var(--border); border-radius:6px;
+    background:var(--panel2); cursor:pointer; user-select:none; overflow:hidden;
+    display:flex; flex-direction:column; gap:1px; min-width:0;
   }
-  .pin:hover{transform:translateY(-1px); filter:brightness(1.12)}
-  .col .pin{min-width:150px}
+  .pin:hover{filter:brightness(1.14)}
+  .col .pin{width:100%; padding:4px 6px}
   .col.right .pin{align-items:flex-end; text-align:right}
-  .bottom .pin{width:58px; min-height:96px; justify-content:flex-start; align-items:center; text-align:center; padding:6px 3px}
-  .pin.locked{cursor:not-allowed; opacity:.9}
+  .bottom .pin{flex:1 1 0; min-width:0; align-items:center; text-align:center; padding:5px 1px; min-height:104px; justify-content:flex-start}
+  /* narrow bottom cells: label vertically so nothing truncates, even on a phone */
+  .bottom .pin .nm{writing-mode:vertical-rl; text-orientation:mixed; margin:2px 0; max-height:52px; overflow:hidden}
+  .bottom .pin .fn{writing-mode:vertical-rl; text-orientation:mixed; max-height:74px; padding:3px 1px; margin-top:1px}
+  .bottom .pin .badges{display:none}
+  .pin.locked{cursor:not-allowed}
   .pin.selected{outline:3px solid var(--accent); outline-offset:1px}
-  .pin .pn{font-size:10px; color:var(--muted)}
-  .pin .nm{font-weight:650; font-size:12.5px}
-  .bottom .pin .nm{font-size:11px; writing-mode:horizontal-tb}
-  .pin .fn{font-size:10.5px; padding:1px 5px; border-radius:4px; background:#000; color:#fff; margin-top:2px; white-space:nowrap; max-width:100%; overflow:hidden; text-overflow:ellipsis}
-  .bottom .pin .fn{font-size:9px; padding:1px 3px}
-  .pin .badges{display:flex; gap:3px; flex-wrap:wrap; margin-top:2px}
+  .pin .pn{font-size:clamp(8px,1.7vw,10px); color:var(--muted); line-height:1.1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%}
+  .pin .nm{font-weight:650; font-size:clamp(9px,2vw,12.5px); line-height:1.1; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:100%}
+  .pin .fn{font-size:clamp(8px,1.7vw,10.5px); padding:1px 4px; border-radius:4px; color:#fff; margin-top:2px; max-width:100%; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; line-height:1.4}
+  .pin .badges{display:flex; gap:2px; flex-wrap:wrap; margin-top:1px; justify-content:inherit}
   .bottom .pin .badges{justify-content:center}
-  .badge{font-size:8.5px; padding:0 4px; border-radius:3px; border:1px solid; line-height:1.5}
+  .badge{font-size:clamp(7px,1.5vw,8.5px); padding:0 3px; border-radius:3px; border:1px solid; line-height:1.5; white-space:nowrap}
   .badge.adc{color:#c4b5fd; border-color:#7c3aed}
   .badge.strap{color:#fcd34d; border-color:#d97706}
-  /* class left-border accent */
-  .pin[data-cls="power/gnd"]{border-left-color:var(--c-power); border-left-width:5px}
-  .pin[data-cls="reset"]{border-left-color:var(--c-reset); border-left-width:5px}
-  .pin[data-cls="safe"]{border-left-color:var(--c-safe); border-left-width:5px}
-  .pin[data-cls="strapping-avoid"],.pin[data-cls="strapping-boot"]{border-left-color:var(--c-strap); border-left-width:5px}
-  .pin[data-cls="psram-reserved"]{border-left-color:var(--c-psram); border-left-width:5px}
-  .pin[data-cls="usb"]{border-left-color:var(--c-usb); border-left-width:5px}
+  /* class accent on the edge that faces the board interior */
+  .pin{border-left-width:5px}
   .col.right .pin{border-left-width:2px; border-right-width:5px}
-  .col.right .pin[data-cls="power/gnd"]{border-right-color:var(--c-power)}
-  .col.right .pin[data-cls="safe"]{border-right-color:var(--c-safe)}
+  .pin[data-cls="power/gnd"]{border-left-color:var(--c-power)}      .col.right .pin[data-cls="power/gnd"]{border-right-color:var(--c-power)}
+  .pin[data-cls="reset"]{border-left-color:var(--c-reset)}          .col.right .pin[data-cls="reset"]{border-right-color:var(--c-reset)}
+  .pin[data-cls="safe"]{border-left-color:var(--c-safe)}            .col.right .pin[data-cls="safe"]{border-right-color:var(--c-safe)}
+  .pin[data-cls="strapping-avoid"],.pin[data-cls="strapping-boot"]{border-left-color:var(--c-strap)}
   .col.right .pin[data-cls="strapping-avoid"],.col.right .pin[data-cls="strapping-boot"]{border-right-color:var(--c-strap)}
-  .col.right .pin[data-cls="psram-reserved"]{border-right-color:var(--c-psram)}
-  .col.right .pin[data-cls="usb"]{border-right-color:var(--c-usb)}
-  /* validation states */
+  .pin[data-cls="psram-reserved"]{border-left-color:var(--c-psram)} .col.right .pin[data-cls="psram-reserved"]{border-right-color:var(--c-psram)}
+  .pin[data-cls="usb"]{border-left-color:var(--c-usb)}              .col.right .pin[data-cls="usb"]{border-right-color:var(--c-usb)}
   .pin.err{box-shadow:0 0 0 2px #dc2626 inset}
   .pin.warn{box-shadow:0 0 0 2px #f59e0b inset}
-  .pin.dim{opacity:.35}
+  .pin.dim{opacity:.32}
   .pin.hl{outline:3px solid #38bdf8; outline-offset:1px}
-  .flag{position:absolute; top:-7px; right:-7px; width:16px; height:16px; border-radius:50%; font-size:11px; font-weight:800; display:flex; align-items:center; justify-content:center; color:#fff}
-  .col.right .flag{right:auto; left:-7px}
-  .flag.err{background:#dc2626}
-  .flag.warn{background:#f59e0b}
+  .flag{position:absolute; top:-1px; right:1px; font-size:11px; font-weight:800; color:#fff}
+  .col.right .flag{right:auto; left:2px}
+  .flag.err{color:#f87171}
+  .flag.warn{color:#fbbf24}
 
-  /* ---- side panels ---- */
+  /* ---------- side panels ---------- */
   .side{display:flex; flex-direction:column; gap:14px}
   .card{background:var(--panel); border:1px solid var(--border); border-radius:10px; padding:14px}
-  .card h2{font-size:12px; text-transform:uppercase; letter-spacing:.6px; color:var(--muted); margin:0 0 10px}
+  .card h2{font-size:12px; text-transform:uppercase; letter-spacing:.6px; color:var(--muted); margin:0 0 10px; display:flex; justify-content:space-between; align-items:center}
   .detail .row{display:flex; justify-content:space-between; gap:8px; padding:3px 0; border-bottom:1px dashed var(--border)}
   .detail .row:last-child{border-bottom:0}
   .detail .k{color:var(--muted)}
@@ -112,31 +110,27 @@
   .msg.warn{background:#3a2a06; color:#fcd34d; border:1px solid #78560a}
   .empty{color:var(--muted); font-size:12.5px}
 
-  .grp{margin-bottom:12px}
-  .grp:last-child{margin-bottom:0}
-  .grp .gh{font-weight:650; font-size:12px; margin-bottom:5px; display:flex; align-items:center; gap:6px}
-  .swatch{width:10px; height:10px; border-radius:2px; display:inline-block}
-  .alist{display:flex; flex-direction:column; gap:3px}
-  .arow{display:flex; justify-content:space-between; gap:8px; font-size:12.5px; padding:2px 6px; background:var(--panel2); border-radius:5px}
-  .arow .p{color:var(--muted); font-size:11px}
+  /* required-signals panel */
+  .req .grp{margin-bottom:12px}
+  .req .grp:last-child{margin-bottom:0}
+  .req .gh{font-weight:650; font-size:12px; margin-bottom:5px; display:flex; align-items:center; gap:6px}
+  .swatch{width:10px; height:10px; border-radius:2px; display:inline-block; flex:none}
+  .sig{display:grid; grid-template-columns:1fr auto; gap:6px; align-items:center; padding:3px 0}
+  .sig .sname{font-size:12.5px; display:flex; align-items:center; gap:6px; min-width:0}
+  .sig .sname .dot{width:8px;height:8px;border-radius:50%;flex:none}
+  .sig .sname span{overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .sig select{margin-top:0; width:auto; min-width:120px; max-width:180px; padding:4px 6px; font-size:12px}
+  .sig.placed .badge-pin{color:#86efac}
+  .sig.err select{border-color:#dc2626}
 
-  .checklist .cl{display:flex; align-items:center; gap:8px; font-size:12.5px; padding:3px 0}
-  .checklist .dot{width:9px; height:9px; border-radius:50%; flex:none}
-  .checklist .dot.ok{background:#16a34a}
-  .checklist .dot.no{background:#4b5563}
-  .checklist .dot.dup{background:#dc2626}
-  .checklist .where{margin-left:auto; color:var(--muted); font-size:11px}
-  .counts{display:flex; gap:14px; flex-wrap:wrap; margin-bottom:10px}
-  .counts .c{background:var(--panel2); border-radius:8px; padding:7px 11px; text-align:center; flex:1; min-width:70px}
-  .counts .c b{display:block; font-size:20px}
-  .counts .c span{font-size:10.5px; color:var(--muted)}
+  .counts{display:flex; gap:10px; flex-wrap:wrap; margin-bottom:6px}
+  .counts .c{background:var(--panel2); border-radius:8px; padding:7px 10px; text-align:center; flex:1; min-width:64px}
+  .counts .c b{display:block; font-size:19px}
+  .counts .c span{font-size:10px; color:var(--muted)}
 
-  .legend{display:flex; flex-wrap:wrap; gap:8px 14px}
+  .legend{display:flex; flex-wrap:wrap; gap:7px 14px}
   .legend .li{display:flex; align-items:center; gap:6px; font-size:11.5px}
   .legend .box{width:12px; height:12px; border-radius:3px; border-left:4px solid}
-
-  .warnpanel .msg{margin-top:0; margin-bottom:6px}
-  .warnpanel .ref{opacity:.7}
   textarea{width:100%; min-height:120px; background:var(--panel2); color:var(--text); border:1px solid var(--border); border-radius:6px; font:12px/1.4 ui-monospace,Menlo,Consolas,monospace; padding:8px}
 </style>
 </head>
@@ -144,7 +138,7 @@
 <header>
   <div>
     <h1>ESP32-S3-WROOM-1 · N8R8 GPIO Pin Allocator</h1>
-    <div class="sub">40-pin module footprint · 8MB Octal PSRAM (R8) · WiFi active (ADC2 unavailable)</div>
+    <div class="sub">de-link board · 40-pin footprint · Octal PSRAM (R8) · WiFi active (ADC2 unavailable)</div>
   </div>
   <div class="toolbar">
     <button id="hl-adc">Highlight ADC1</button>
@@ -162,18 +156,18 @@
     <div class="board-wrap">
       <div class="board">
         <div class="col left" id="col-left"></div>
-        <div class="center"><div class="chip"><b>ESP32-S3-WROOM-1</b>N8R8 · Octal PSRAM<br><span style="font-size:11px">(component body)</span></div></div>
+        <div class="center"><div class="chip"><b>ESP32-S3-WROOM-1</b>N8R8 · Octal PSRAM<br>(component body)</div></div>
         <div class="col right" id="col-right"></div>
         <div class="bottom" id="row-bottom"></div>
       </div>
     </div>
     <div class="card" style="margin-top:14px">
-      <h2>Legend — pin class (left/right border color)</h2>
+      <h2>Legend — pin class</h2>
       <div class="legend">
         <div class="li"><span class="box" style="border-left-color:var(--c-safe)"></span>safe (usable GPIO)</div>
-        <div class="li"><span class="box" style="border-left-color:var(--c-strap)"></span>strapping (avoid driving at boot)</div>
+        <div class="li"><span class="box" style="border-left-color:var(--c-strap)"></span>strapping (boot-sensitive)</div>
         <div class="li"><span class="box" style="border-left-color:var(--c-psram)"></span>PSRAM-reserved (locked)</div>
-        <div class="li"><span class="box" style="border-left-color:var(--c-usb)"></span>USB D-/D+</div>
+        <div class="li"><span class="box" style="border-left-color:var(--c-usb)"></span>USB D-/D+ (locked)</div>
         <div class="li"><span class="box" style="border-left-color:var(--c-power)"></span>power / GND (locked)</div>
         <div class="li"><span class="box" style="border-left-color:var(--c-reset)"></span>reset / EN (locked)</div>
       </div>
@@ -181,109 +175,115 @@
   </div>
 
   <div class="side">
-    <div class="card detail" id="detail">
-      <h2>Pin detail</h2>
-      <div class="empty">Click a pin to inspect and assign a function.</div>
-    </div>
-
-    <div class="card warnpanel" id="warnpanel">
-      <h2>Validation</h2>
-      <div class="empty">No issues.</div>
-    </div>
-
-    <div class="card checklist" id="checklist">
-      <h2>Allocation status</h2>
-    </div>
-
-    <div class="card" id="assignments">
-      <h2>Assignments by function</h2>
-    </div>
+    <div class="card detail" id="detail"></div>
+    <div class="card req" id="req"></div>
+    <div class="card" id="warnpanel"></div>
+    <div class="card" id="assignments"></div>
   </div>
 </div>
 
 <script>
 /* ======================= AUTHORITATIVE PIN TABLE ======================= */
-/* Transcribed exactly from the spec — do not "correct" from memory. */
+/* ESP32-S3-WROOM-1 (N8R8). Transcribed from spec — do not "correct" from memory.
+   GPIO33/34 intentionally absent: not broken out to module pins on WROOM-1.
+   ADC1 = GPIO1–10. Octal-PSRAM (R8) reserves GPIO35/36/37. */
 const PINS = [
-  {pin:1, name:"GND",    gpio:null, edge:"Left",   cls:"power/gnd",       adc1:false, fspi:null},
-  {pin:2, name:"3V3",    gpio:null, edge:"Left",   cls:"power/gnd",       adc1:false, fspi:null},
-  {pin:3, name:"EN",     gpio:null, edge:"Left",   cls:"reset",          adc1:false, fspi:null},
-  {pin:4, name:"GPIO4",  gpio:4,    edge:"Left",   cls:"safe",           adc1:true,  fspi:null},
-  {pin:5, name:"GPIO5",  gpio:5,    edge:"Left",   cls:"safe",           adc1:true,  fspi:null},
-  {pin:6, name:"GPIO6",  gpio:6,    edge:"Left",   cls:"safe",           adc1:true,  fspi:null},
-  {pin:7, name:"GPIO7",  gpio:7,    edge:"Left",   cls:"safe",           adc1:true,  fspi:null},
-  {pin:8, name:"GPIO15", gpio:15,   edge:"Left",   cls:"safe",           adc1:false, fspi:null},
-  {pin:9, name:"GPIO16", gpio:16,   edge:"Left",   cls:"safe",           adc1:false, fspi:null},
-  {pin:10,name:"GPIO17", gpio:17,   edge:"Left",   cls:"safe",           adc1:false, fspi:null},
-  {pin:11,name:"GPIO18", gpio:18,   edge:"Left",   cls:"safe",           adc1:false, fspi:null},
-  {pin:12,name:"GPIO8",  gpio:8,    edge:"Left",   cls:"safe",           adc1:true,  fspi:null},
-  {pin:13,name:"GPIO19", gpio:19,   edge:"Left",   cls:"usb",            adc1:false, fspi:null, note:"USB D-"},
-  {pin:14,name:"GPIO20", gpio:20,   edge:"Left",   cls:"usb",            adc1:false, fspi:null, note:"USB D+"},
-  {pin:15,name:"GPIO3",  gpio:3,    edge:"Bottom", cls:"strapping-avoid",adc1:true,  fspi:null},
-  {pin:16,name:"GPIO46", gpio:46,   edge:"Bottom", cls:"strapping-avoid",adc1:false, fspi:null},
-  {pin:17,name:"GPIO9",  gpio:9,    edge:"Bottom", cls:"safe",           adc1:true,  fspi:"FSPIHD"},
-  {pin:18,name:"GPIO10", gpio:10,   edge:"Bottom", cls:"safe",           adc1:true,  fspi:"FSPICS0"},
-  {pin:19,name:"GPIO11", gpio:11,   edge:"Bottom", cls:"safe",           adc1:false, fspi:"FSPID (MOSI)"},
-  {pin:20,name:"GPIO12", gpio:12,   edge:"Bottom", cls:"safe",           adc1:false, fspi:"FSPICLK"},
-  {pin:21,name:"GPIO13", gpio:13,   edge:"Bottom", cls:"safe",           adc1:false, fspi:"FSPIQ (MISO)"},
-  {pin:22,name:"GPIO14", gpio:14,   edge:"Bottom", cls:"safe",           adc1:false, fspi:"FSPIWP"},
-  {pin:23,name:"GPIO21", gpio:21,   edge:"Bottom", cls:"safe",           adc1:false, fspi:null},
-  {pin:24,name:"GPIO47", gpio:47,   edge:"Bottom", cls:"safe",           adc1:false, fspi:null},
-  {pin:25,name:"GPIO48", gpio:48,   edge:"Bottom", cls:"safe",           adc1:false, fspi:null},
-  {pin:26,name:"GPIO45", gpio:45,   edge:"Bottom", cls:"strapping-avoid",adc1:false, fspi:null},
-  {pin:27,name:"GPIO0",  gpio:0,    edge:"Right",  cls:"strapping-boot", adc1:false, fspi:null},
-  {pin:28,name:"GPIO35", gpio:35,   edge:"Right",  cls:"psram-reserved", adc1:false, fspi:null},
-  {pin:29,name:"GPIO36", gpio:36,   edge:"Right",  cls:"psram-reserved", adc1:false, fspi:null},
-  {pin:30,name:"GPIO37", gpio:37,   edge:"Right",  cls:"psram-reserved", adc1:false, fspi:null},
-  {pin:31,name:"GPIO38", gpio:38,   edge:"Right",  cls:"safe",           adc1:false, fspi:null},
-  {pin:32,name:"GPIO39", gpio:39,   edge:"Right",  cls:"safe",           adc1:false, fspi:null, note:"boot pull-up"},
-  {pin:33,name:"GPIO40", gpio:40,   edge:"Right",  cls:"safe",           adc1:false, fspi:null},
-  {pin:34,name:"GPIO41", gpio:41,   edge:"Right",  cls:"safe",           adc1:false, fspi:null},
-  {pin:35,name:"GPIO42", gpio:42,   edge:"Right",  cls:"safe",           adc1:false, fspi:null},
-  {pin:36,name:"GPIO43", gpio:43,   edge:"Right",  cls:"safe",           adc1:false, fspi:null, note:"UART0 TX (default console)"},
-  {pin:37,name:"GPIO44", gpio:44,   edge:"Right",  cls:"safe",           adc1:false, fspi:null, note:"UART0 RX (default console)"},
-  {pin:38,name:"GPIO2",  gpio:2,    edge:"Right",  cls:"safe",           adc1:true,  fspi:null},
-  {pin:39,name:"GPIO1",  gpio:1,    edge:"Right",  cls:"safe",           adc1:true,  fspi:null},
-  {pin:40,name:"GND",    gpio:null, edge:"Right",  cls:"power/gnd",      adc1:false, fspi:null},
+  {pin:1, name:"GND",    gpio:null, edge:"Left",   cls:"power/gnd",       adc1:false},
+  {pin:2, name:"3V3",    gpio:null, edge:"Left",   cls:"power/gnd",       adc1:false},
+  {pin:3, name:"EN",     gpio:null, edge:"Left",   cls:"reset",          adc1:false},
+  {pin:4, name:"GPIO4",  gpio:4,    edge:"Left",   cls:"safe",           adc1:true },
+  {pin:5, name:"GPIO5",  gpio:5,    edge:"Left",   cls:"safe",           adc1:true },
+  {pin:6, name:"GPIO6",  gpio:6,    edge:"Left",   cls:"safe",           adc1:true },
+  {pin:7, name:"GPIO7",  gpio:7,    edge:"Left",   cls:"safe",           adc1:true },
+  {pin:8, name:"GPIO15", gpio:15,   edge:"Left",   cls:"safe",           adc1:false},
+  {pin:9, name:"GPIO16", gpio:16,   edge:"Left",   cls:"safe",           adc1:false},
+  {pin:10,name:"GPIO17", gpio:17,   edge:"Left",   cls:"safe",           adc1:false},
+  {pin:11,name:"GPIO18", gpio:18,   edge:"Left",   cls:"safe",           adc1:false},
+  {pin:12,name:"GPIO8",  gpio:8,    edge:"Left",   cls:"safe",           adc1:true },
+  {pin:13,name:"GPIO19", gpio:19,   edge:"Left",   cls:"usb",            adc1:false, note:"USB D-"},
+  {pin:14,name:"GPIO20", gpio:20,   edge:"Left",   cls:"usb",            adc1:false, note:"USB D+"},
+  {pin:15,name:"GPIO3",  gpio:3,    edge:"Bottom", cls:"strapping-avoid",adc1:true },
+  {pin:16,name:"GPIO46", gpio:46,   edge:"Bottom", cls:"strapping-avoid",adc1:false},
+  {pin:17,name:"GPIO9",  gpio:9,    edge:"Bottom", cls:"safe",           adc1:true },
+  {pin:18,name:"GPIO10", gpio:10,   edge:"Bottom", cls:"safe",           adc1:true },
+  {pin:19,name:"GPIO11", gpio:11,   edge:"Bottom", cls:"safe",           adc1:false},
+  {pin:20,name:"GPIO12", gpio:12,   edge:"Bottom", cls:"safe",           adc1:false},
+  {pin:21,name:"GPIO13", gpio:13,   edge:"Bottom", cls:"safe",           adc1:false},
+  {pin:22,name:"GPIO14", gpio:14,   edge:"Bottom", cls:"safe",           adc1:false},
+  {pin:23,name:"GPIO21", gpio:21,   edge:"Bottom", cls:"safe",           adc1:false},
+  {pin:24,name:"GPIO47", gpio:47,   edge:"Bottom", cls:"safe",           adc1:false},
+  {pin:25,name:"GPIO48", gpio:48,   edge:"Bottom", cls:"safe",           adc1:false},
+  {pin:26,name:"GPIO45", gpio:45,   edge:"Bottom", cls:"strapping-avoid",adc1:false},
+  {pin:27,name:"GPIO0",  gpio:0,    edge:"Right",  cls:"strapping-boot", adc1:false},
+  {pin:28,name:"GPIO35", gpio:35,   edge:"Right",  cls:"psram-reserved", adc1:false},
+  {pin:29,name:"GPIO36", gpio:36,   edge:"Right",  cls:"psram-reserved", adc1:false},
+  {pin:30,name:"GPIO37", gpio:37,   edge:"Right",  cls:"psram-reserved", adc1:false},
+  {pin:31,name:"GPIO38", gpio:38,   edge:"Right",  cls:"safe",           adc1:false},
+  {pin:32,name:"GPIO39", gpio:39,   edge:"Right",  cls:"safe",           adc1:false, note:"boot pull-up"},
+  {pin:33,name:"GPIO40", gpio:40,   edge:"Right",  cls:"safe",           adc1:false},
+  {pin:34,name:"GPIO41", gpio:41,   edge:"Right",  cls:"safe",           adc1:false},
+  {pin:35,name:"GPIO42", gpio:42,   edge:"Right",  cls:"safe",           adc1:false},
+  {pin:36,name:"GPIO43", gpio:43,   edge:"Right",  cls:"safe",           adc1:false, note:"UART0 TX (default console)"},
+  {pin:37,name:"GPIO44", gpio:44,   edge:"Right",  cls:"safe",           adc1:false, note:"UART0 RX (default console)"},
+  {pin:38,name:"GPIO2",  gpio:2,    edge:"Right",  cls:"safe",           adc1:true },
+  {pin:39,name:"GPIO1",  gpio:1,    edge:"Right",  cls:"safe",           adc1:true },
+  {pin:40,name:"GND",    gpio:null, edge:"Right",  cls:"power/gnd",      adc1:false},
 ];
 const PIN = Object.fromEntries(PINS.map(p=>[p.pin,p]));
-
-/* ======================= FUNCTION CATALOG ======================= */
-// group -> css color var suffix. unique: only one pin may hold it. selectable: offered in dropdown.
-const FUNCTIONS = [
-  {id:"unassigned", label:"Unassigned",     group:"—",        color:null,           selectable:true},
-  {id:"gpio",       label:"Simple GPIO",    group:"General",  color:"var(--g-general)", selectable:true},
-  {id:"adc",        label:"ADC (ADC1)",     group:"Analog",   color:"var(--g-analog)",  selectable:true, requireAdc1:true},
-  {id:"i2c_sda",    label:"I2C SDA",        group:"I2C",      color:"var(--g-i2c)",   selectable:true, unique:true, driven:true},
-  {id:"i2c_scl",    label:"I2C SCL",        group:"I2C",      color:"var(--g-i2c)",   selectable:true, unique:true, driven:true},
-  {id:"spi_mosi",   label:"SPI MOSI",       group:"SPI",      color:"var(--g-spi)",   selectable:true, unique:true, spi:true, driven:true},
-  {id:"spi_miso",   label:"SPI MISO",       group:"SPI",      color:"var(--g-spi)",   selectable:true, unique:true, spi:true},
-  {id:"spi_clk",    label:"SPI CLK",        group:"SPI",      color:"var(--g-spi)",   selectable:true, unique:true, spi:true, driven:true},
-  {id:"spi_cs",     label:"SPI CS",         group:"SPI",      color:"var(--g-spi)",   selectable:true, unique:true, spi:true, driven:true},
-  {id:"sd_clk",     label:"SDMMC CLK",      group:"SDMMC",    color:"var(--g-sd)",    selectable:true, unique:true, driven:true},
-  {id:"sd_cmd",     label:"SDMMC CMD",      group:"SDMMC",    color:"var(--g-sd)",    selectable:true, unique:true, driven:true},
-  {id:"sd_d0",      label:"SDMMC D0",       group:"SDMMC",    color:"var(--g-sd)",    selectable:true, unique:true, driven:true},
-  {id:"sd_d1",      label:"SDMMC D1",       group:"SDMMC",    color:"var(--g-sd)",    selectable:true, unique:true, driven:true},
-  {id:"sd_d2",      label:"SDMMC D2",       group:"SDMMC",    color:"var(--g-sd)",    selectable:true, unique:true, driven:true},
-  {id:"sd_d3",      label:"SDMMC D3",       group:"SDMMC",    color:"var(--g-sd)",    selectable:true, unique:true, driven:true},
-  {id:"usb_dm",     label:"USB D-",         group:"USB",      color:"var(--g-usb)",   selectable:false, unique:true, locked:true, fixedGpio:19, driven:true},
-  {id:"usb_dp",     label:"USB D+",         group:"USB",      color:"var(--g-usb)",   selectable:false, unique:true, locked:true, fixedGpio:20, driven:true},
-  {id:"boot_btn",   label:"BOOT button",    group:"Buttons",  color:"var(--g-buttons)", selectable:true, unique:true, fixedGpio:0},
-  {id:"en_rst_btn", label:"EN / RST button",group:"Buttons",  color:"var(--g-buttons)", selectable:false, unique:true, locked:true},
-  {id:"power",      label:"Power / GND",    group:"Power",    color:"var(--g-reserved)", selectable:false, locked:true},
-  {id:"psram",      label:"PSRAM (reserved)",group:"Reserved",color:"var(--c-psram)", selectable:false, locked:true},
-];
-const FN = Object.fromEntries(FUNCTIONS.map(f=>[f.id,f]));
 const STRAP_GPIOS = [0,3,45,46];
 
-/* ======================= STATE ======================= */
-let state = {};           // pin -> function id
-let lockedDefault = {};   // pin -> function id (fixed, non-editable)
-let selected = null;      // pin number
-let highlight = null;     // 'adc'|'fspi'|'strap'|'safe'|null
+/* ======================= HARD-CODED SIGNAL LIST (de-link board) ======================= */
+/* These are YOUR required functions. Each is assigned to a physical pin by you — nothing is
+   pre-attached to a GPIO. Edit this list to add/rename/re-categorise signals.
+   cap drives validation & colour:  adc (needs ADC1) | i2c | spi | sdmmc | uart | gpio        */
+const CAP_COLOR = {adc:"#a855f7", i2c:"#22c55e", spi:"#06b6d4", sdmmc:"#eab308", uart:"#64748b", gpio:"#0ea5e9"};
+const GROUP_ORDER = ["Analog","LED","Power/Ctrl","I2C","UART","microSD","E-paper","Spare"];
+const SIGNALS = [
+  {id:"BAT_MONIT",    group:"Analog",     cap:"adc"},
+  {id:"BUTTON_ADC_1", group:"Analog",     cap:"adc"},
+  {id:"BUTTON_ADC_2", group:"Analog",     cap:"adc"},
+  {id:"PWM_LED",      group:"LED",        cap:"gpio"},
+  {id:"COLOR_SEL",    group:"LED",        cap:"gpio"},
+  {id:"LED_LATCH",    group:"LED",        cap:"gpio"},
+  {id:"USB_STAT",     group:"Power/Ctrl", cap:"gpio"},
+  {id:"PWR_BUTTON",   group:"Power/Ctrl", cap:"gpio"},
+  {id:"SDA",          group:"I2C",        cap:"i2c"},
+  {id:"SCL",          group:"I2C",        cap:"i2c"},
+  {id:"UART_TX",      group:"UART",       cap:"uart"},
+  {id:"UART_RX",      group:"UART",       cap:"uart"},
+  {id:"SD_CLK",       group:"microSD",    cap:"sdmmc"},
+  {id:"SD_CMD",       group:"microSD",    cap:"sdmmc"},
+  {id:"SD_DAT0",      group:"microSD",    cap:"sdmmc"},
+  {id:"SD_DAT1",      group:"microSD",    cap:"sdmmc"},
+  {id:"SD_DAT2",      group:"microSD",    cap:"sdmmc"},
+  {id:"SD_DAT3",      group:"microSD",    cap:"sdmmc"},
+  {id:"EPD_SCK",      group:"E-paper",    cap:"spi"},
+  {id:"EPD_MOSI",     group:"E-paper",    cap:"spi"},
+  {id:"EPD_CS",       group:"E-paper",    cap:"spi"},
+  {id:"EPD_DC",       group:"E-paper",    cap:"gpio"},
+  {id:"EPD_RST",      group:"E-paper",    cap:"gpio"},
+  {id:"EPD_BUSY",     group:"E-paper",    cap:"gpio"},
+];
 
-// Pins whose function is fixed by the module itself (not a design choice) — pre-locked, non-editable.
+/* Assignable-function catalog = signals + generic spare + locked (module-fixed) entries. */
+const FN = {};
+SIGNALS.forEach(s=>{ FN[s.id]={id:s.id, label:s.id, group:s.group, cap:s.cap, color:CAP_COLOR[s.cap], unique:true}; });
+FN["unassigned"] = {id:"unassigned", label:"Unassigned", group:"—", color:null};
+FN["spare_gpio"] = {id:"spare_gpio", label:"Spare GPIO → header", group:"Spare", cap:"gpio", color:"#475569", unique:false};
+FN["power"]      = {id:"power", label:"Power / GND", group:"Power", color:"var(--c-power)", locked:true};
+FN["en_rst_btn"] = {id:"en_rst_btn", label:"EN / RST", group:"Reset", color:"var(--c-reset)", locked:true};
+FN["psram"]      = {id:"psram", label:"PSRAM (reserved)", group:"Reserved", color:"var(--c-psram)", locked:true};
+FN["usb_dm"]     = {id:"usb_dm", label:"USB D-", group:"USB", color:"var(--c-usb)", locked:true};
+FN["usb_dp"]     = {id:"usb_dp", label:"USB D+", group:"USB", color:"var(--c-usb)", locked:true};
+
 const LOCKED_CLASSES = ["power/gnd","reset","psram-reserved","usb"];
+
+/* ======================= STATE ======================= */
+let state = {};           // pin -> function/signal id
+let lockedDefault = {};   // pin -> id (module-fixed, non-editable)
+let selected = null;
+let highlight = null;     // 'adc'|'strap'|'safe'|null
+
 function initState(){
   lockedDefault = {};
   PINS.forEach(p=>{
@@ -296,56 +296,35 @@ function initState(){
     state[p.pin]=fn;
   });
 }
-function isLocked(pin){ return pin in lockedDefault; }
+const isLocked = pin => pin in lockedDefault;
+const pinOfSignal = id => PINS.find(p=>state[p.pin]===id)?.pin ?? null;
+const capOK = (p,fn) => !(fn.cap==="adc" && !p.adc1);   // ADC needs ADC1; everything else routes anywhere
 
 /* ======================= VALIDATION ======================= */
-// Returns { issues: {pin:{errors:[],warns:[]}}, list:[{level,text,pin}] }
 function validate(){
   const issues={}; PINS.forEach(p=>issues[p.pin]={errors:[],warns:[]});
-
-  // duplicate unique signals
-  const uniqMap={};
-  PINS.forEach(p=>{
-    const a=state[p.pin], fn=FN[a];
-    if(!fn||a==="unassigned") return;
-    if(fn.unique){ (uniqMap[a]=uniqMap[a]||[]).push(p.pin); }
-  });
+  const cnt={};
+  PINS.forEach(p=>{ const a=state[p.pin]; const fn=FN[a]; if(!fn||a==="unassigned"||!fn.unique) return; (cnt[a]=cnt[a]||[]).push(p.pin); });
 
   PINS.forEach(p=>{
-    const a=state[p.pin], fn=FN[a];
-    if(!fn||a==="unassigned") return;
-    const I=issues[p.pin];
+    const a=state[p.pin], fn=FN[a], I=issues[p.pin];
+    if(!fn || a==="unassigned") return;
 
-    // Rule 1: ADC only on ADC1 pins
-    if(fn.requireAdc1 && !p.adc1)
-      I.errors.push("ADC2 unavailable while WiFi is active — ADC only allowed on ADC1 pins.");
+    if(fn.cap==="adc" && !p.adc1)
+      I.errors.push("ADC2 is unavailable while WiFi is active — ADC signals are only valid on ADC1 pins (GPIO1–10).");
 
-    // Rule 4: USB fixed to GPIO19/20
-    if(fn.fixedGpio!=null && (a==="usb_dm"||a==="usb_dp") && p.gpio!==fn.fixedGpio)
-      I.errors.push(`${fn.label} must be on GPIO${fn.fixedGpio} (USB is a fixed pin).`);
-
-    // BOOT button should map to GPIO0
-    if(a==="boot_btn" && p.gpio!==0)
-      I.warns.push("BOOT button should map to GPIO0.");
-
-    // Rule 2: PSRAM pins locked (defensive — should never trip via UI)
     if(p.cls==="psram-reserved" && a!=="psram")
-      I.errors.push("GPIO35/36/37 are reserved for Octal PSRAM on the R8 module.");
+      I.errors.push("GPIO35/36/37 are reserved for the Octal PSRAM on the R8 module.");
 
-    // Rule 3: strapping pin driven at boot
-    if(STRAP_GPIOS.includes(p.gpio) && !fn.locked && !(a==="boot_btn"&&p.gpio===0) && a!=="gpio")
-      I.warns.push("Strapping pin — avoid driving this at boot (check level requirements).");
-    else if(STRAP_GPIOS.includes(p.gpio) && a==="gpio")
-      I.warns.push("Strapping pin — ensure your GPIO use doesn't violate the boot strap level.");
+    if(STRAP_GPIOS.includes(p.gpio) && !fn.locked)
+      I.warns.push("Strapping pin — confirm the boot-strap level is respected (don't fight the strap at boot).");
 
-    // Rule 5: UART0 shared pins
-    if((p.gpio===43||p.gpio===44) && !fn.locked)
-      I.warns.push("Shared with UART0 (default serial console) — frees the console if reused.");
+    if((p.gpio===43||p.gpio===44) && !fn.locked && fn.cap!=="uart")
+      I.warns.push("This is a UART0 pin (default serial console) — putting a non-UART signal here removes the default console.");
 
-    // Rule 6: duplicate unique
-    if(fn.unique && uniqMap[a] && uniqMap[a].length>1){
-      const others=uniqMap[a].filter(x=>x!==p.pin).map(x=>"pin "+x).join(", ");
-      I.errors.push(`Duplicate ${fn.label} — also assigned on ${others}.`);
+    if(fn.unique && cnt[a] && cnt[a].length>1){
+      const others=cnt[a].filter(x=>x!==p.pin).map(x=>"pin "+x).join(", ");
+      I.errors.push(`Duplicate ${fn.label} — also on ${others}.`);
     }
   });
 
@@ -357,248 +336,228 @@ function validate(){
   return {issues,list};
 }
 
-/* ======================= RENDER ======================= */
-function fnTag(id){
-  const fn=FN[id];
-  if(!fn||id==="unassigned") return "";
-  return `<span class="fn" style="background:${fn.color||'#333'}">${fn.label}</span>`;
-}
+/* ======================= RENDER: BOARD ======================= */
+function grpColor(id){ return FN[id]?.color || "#333"; }
 function pinEl(p, issues){
   const el=document.createElement("div");
-  el.className="pin";
-  el.dataset.cls=p.cls; el.dataset.pin=p.pin;
+  el.className="pin"; el.dataset.cls=p.cls; el.dataset.pin=p.pin;
   if(isLocked(p.pin)) el.classList.add("locked");
   if(selected===p.pin) el.classList.add("selected");
   const iss=issues[p.pin];
-  if(iss.errors.length) el.classList.add("err");
-  else if(iss.warns.length) el.classList.add("warn");
+  if(iss.errors.length) el.classList.add("err"); else if(iss.warns.length) el.classList.add("warn");
 
-  // highlight filter
   if(highlight){
-    let match=false;
-    if(highlight==="adc") match=p.adc1;
-    else if(highlight==="strap") match=STRAP_GPIOS.includes(p.gpio);
-    else if(highlight==="safe") match=(p.cls==="safe" && state[p.pin]==="unassigned");
-    el.classList.add(match?"hl":"dim");
+    let m=false;
+    if(highlight==="adc") m=p.adc1;
+    else if(highlight==="strap") m=STRAP_GPIOS.includes(p.gpio);
+    else if(highlight==="safe") m=(p.cls==="safe" && state[p.pin]==="unassigned");
+    el.classList.add(m?"hl":"dim");
   }
+
   let badges="";
   if(p.adc1) badges+=`<span class="badge adc">ADC1</span>`;
   if(STRAP_GPIOS.includes(p.gpio)) badges+=`<span class="badge strap">STRAP</span>`;
 
-  el.innerHTML=`
-    <span class="pn">pin ${p.pin}${p.gpio!=null?" · GPIO"+p.gpio:""}</span>
-    <span class="nm">${p.name}</span>
-    ${fnTag(state[p.pin])}
-    <span class="badges">${badges}</span>
-  `;
-  if(iss.errors.length) el.innerHTML+=`<span class="flag err">!</span>`;
-  else if(iss.warns.length) el.innerHTML+=`<span class="flag warn">!</span>`;
+  const a=state[p.pin];
+  const fnHtml = (a!=="unassigned") ? `<span class="fn" style="background:${grpColor(a)}">${FN[a].label}</span>` : "";
+  // bottom-row cells are narrow — use a compact "IO46"-style name so it stays legible on mobile
+  const shortName = p.edge==="Bottom" ? p.name.replace("GPIO","IO") : p.name;
+  el.title = `Pin ${p.pin} · ${p.name}${p.gpio!=null?" (GPIO"+p.gpio+")":""} · ${p.cls}`
+           + (a!=="unassigned"?` · ${FN[a].label}`:"");
+  el.innerHTML =
+     `<span class="pn">${p.edge==="Bottom" ? "#"+p.pin : "pin "+p.pin}</span>`
+   + `<span class="nm">${shortName}</span>`
+   + fnHtml
+   + `<span class="badges">${badges}</span>`
+   + (iss.errors.length?`<span class="flag err">⛔</span>`:iss.warns.length?`<span class="flag warn">⚠</span>`:"");
 
   el.addEventListener("click",()=>{ selected=p.pin; renderAll(); });
   return el;
 }
-
 function renderBoard(issues){
   const L=document.getElementById("col-left"), R=document.getElementById("col-right"), B=document.getElementById("row-bottom");
   L.innerHTML=R.innerHTML=B.innerHTML="";
-  PINS.filter(p=>p.edge==="Left").forEach(p=>L.appendChild(pinEl(p,issues)));               // 1..14 top->bottom
-  PINS.filter(p=>p.edge==="Bottom").forEach(p=>B.appendChild(pinEl(p,issues)));              // 15..26 left->right
-  PINS.filter(p=>p.edge==="Right").slice().reverse().forEach(p=>R.appendChild(pinEl(p,issues))); // 40..27 top->bottom (perimeter)
+  PINS.filter(p=>p.edge==="Left").forEach(p=>L.appendChild(pinEl(p,issues)));
+  PINS.filter(p=>p.edge==="Bottom").forEach(p=>B.appendChild(pinEl(p,issues)));
+  PINS.filter(p=>p.edge==="Right").slice().reverse().forEach(p=>R.appendChild(pinEl(p,issues)));
 }
 
-function selectableFor(p){
-  return FUNCTIONS.filter(f=>{
-    if(!f.selectable) return false;
-    if(f.requireAdc1 && !p.adc1) return false;                 // Rule 1 enforced at input
-    if(f.id==="usb_dm" && p.gpio!==19) return false;           // Rule 4 enforced at input
-    if(f.id==="usb_dp" && p.gpio!==20) return false;
-    if(f.id==="boot_btn" && p.gpio!==0) return false;          // BOOT only on GPIO0
-    return true;
+/* ======================= RENDER: PIN DETAIL ======================= */
+// signals eligible to be placed on pin p (capability ok, and either free elsewhere or already here)
+function signalsForPin(p){
+  return SIGNALS.filter(s=>{
+    const fn=FN[s.id];
+    if(!capOK(p,fn)) return false;
+    const at=pinOfSignal(s.id);
+    return at===null || at===p.pin;
   });
 }
-
 function renderDetail(issues){
   const d=document.getElementById("detail");
-  if(selected==null){ d.innerHTML=`<h2>Pin detail</h2><div class="empty">Click a pin to inspect and assign a function.</div>`; return; }
+  if(selected==null){ d.innerHTML=`<h2>Pin detail</h2><div class="empty">Click a pin to inspect and assign a function. Or use the “Required signals” panel below to drive assignment from the signal side.</div>`; return; }
   const p=PIN[selected], iss=issues[selected];
   let html=`<h2>Pin detail</h2>
-    <div class="row"><span class="k">Pin</span><span>${p.pin} (${p.edge} edge)</span></div>
+    <div class="row"><span class="k">Pin</span><span>${p.pin} · ${p.edge} edge</span></div>
     <div class="row"><span class="k">Name</span><span>${p.name}</span></div>
     <div class="row"><span class="k">GPIO</span><span>${p.gpio!=null?p.gpio:"—"}</span></div>
     <div class="row"><span class="k">Class</span><span>${p.cls}</span></div>
     <div class="row"><span class="k">ADC1 capable</span><span>${p.adc1?"yes":"no"}</span></div>
     <div class="row"><span class="k">Strapping</span><span>${STRAP_GPIOS.includes(p.gpio)?"yes":"no"}</span></div>
-    ${p.note?`<div class="row"><span class="k">Note</span><span>${p.note}</span></div>`:""}
-  `;
+    ${p.note?`<div class="row"><span class="k">Note</span><span>${p.note}</span></div>`:""}`;
   if(isLocked(selected)){
-    html+=`<div class="hint">🔒 This pin is pre-locked (${FN[state[selected]].label}) and not editable — it is fixed by the module (power/GND, EN/reset, native USB D±, or Octal-PSRAM reserved).</div>`;
+    html+=`<div class="hint">🔒 Pre-locked (${FN[state[selected]].label}) and not editable — fixed by the module (power/GND, EN/reset, native USB D±, or Octal-PSRAM reserved).</div>`;
   } else {
-    const opts=selectableFor(p).map(f=>`<option value="${f.id}" ${state[selected]===f.id?"selected":""}>${f.label}</option>`).join("");
+    const cur=state[selected];
+    let opts=`<option value="unassigned"${cur==="unassigned"?" selected":""}>Unassigned</option>`;
+    opts+=`<option value="spare_gpio"${cur==="spare_gpio"?" selected":""}>Spare GPIO → header</option>`;
+    GROUP_ORDER.filter(g=>g!=="Spare").forEach(g=>{
+      const items=signalsForPin(p).filter(s=>s.group===g);
+      if(!items.length) return;
+      opts+=`<optgroup label="${g}">`+items.map(s=>`<option value="${s.id}"${cur===s.id?" selected":""}>${s.id}</option>`).join("")+`</optgroup>`;
+    });
     html+=`<select id="fnselect">${opts}</select>`;
-    html+=`<div class="hint">I2C/SPI/SDMMC have no dedicated pins on the S3 — any safe GPIO works via the GPIO matrix; cluster them physically for clean routing.</div>`;
+    html+=`<div class="hint">Only ADC1 pins offer ADC signals; every other signal can route to any safe pin via the GPIO matrix — cluster a bus physically for clean routing.</div>`;
   }
   iss.errors.forEach(t=>html+=`<div class="msg err">⛔ ${t}</div>`);
   iss.warns.forEach(t=>html+=`<div class="msg warn">⚠ ${t}</div>`);
   d.innerHTML=html;
   const sel=document.getElementById("fnselect");
-  if(sel) sel.addEventListener("change",e=>{ state[selected]=e.target.value; renderAll(); });
+  if(sel) sel.addEventListener("change",e=>{ assignPinToFunction(selected, e.target.value); });
 }
 
-function renderWarnings(list){
-  const w=document.getElementById("warnpanel");
-  if(!list.length){ w.innerHTML=`<h2>Validation</h2><div class="empty">✓ No issues.</div>`; return; }
-  const errs=list.filter(x=>x.level==="err"), warns=list.filter(x=>x.level==="warn");
-  let html=`<h2>Validation · ${errs.length} blocking, ${warns.length} warnings</h2>`;
-  list.forEach(x=>{
-    const p=PIN[x.pin];
-    html+=`<div class="msg ${x.level}"><b>${p.name}</b> (pin ${x.pin}) — ${x.text}</div>`;
-  });
-  w.innerHTML=html;
+/* Assign a function to a pin (pin-centric). Unique signals are single-holder. */
+function assignPinToFunction(pin, fnId){
+  if(FN[fnId]?.unique){ const prev=pinOfSignal(fnId); if(prev!=null && prev!==pin) state[prev]="unassigned"; }
+  state[pin]=fnId; renderAll();
+}
+/* Assign a signal to a pin (signal-centric, from Required-signals panel). */
+function assignSignalToPin(sigId, pin){
+  const prev=pinOfSignal(sigId); if(prev!=null) state[prev]="unassigned";     // clear old home
+  if(pin!==""){ const np=Number(pin); if(!isLocked(np)) state[np]=sigId; }     // place (overwrites occupant)
+  renderAll();
 }
 
-function renderChecklist(){
-  const c=document.getElementById("checklist");
-  const editable=PINS.filter(p=>!isLocked(p.pin));
-  const assigned=editable.filter(p=>state[p.pin]!=="unassigned").length;
+/* ======================= RENDER: REQUIRED SIGNALS ======================= */
+function renderReq(){
+  const c=document.getElementById("req");
+  const placed=SIGNALS.filter(s=>pinOfSignal(s.id)!=null).length;
   const freeSafe=PINS.filter(p=>p.cls==="safe" && state[p.pin]==="unassigned").length;
-
-  let html=`<h2>Allocation status</h2>
+  let html=`<h2>Required signals <span style="text-transform:none;letter-spacing:0">${placed}/${SIGNALS.length} placed</span></h2>
     <div class="counts">
-      <div class="c"><b>${assigned}</b><span>assigned</span></div>
-      <div class="c"><b>${editable.length-assigned}</b><span>editable free</span></div>
-      <div class="c"><b>${freeSafe}</b><span>free "safe" pins</span></div>
+      <div class="c"><b>${placed}</b><span>placed</span></div>
+      <div class="c"><b>${SIGNALS.length-placed}</b><span>unplaced</span></div>
+      <div class="c"><b>${freeSafe}</b><span>free safe pins</span></div>
     </div>`;
-
-  // required-signal checklist by bus
-  const buses=[
-    {name:"I2C",   roles:["i2c_sda","i2c_scl"]},
-    {name:"SPI",   roles:["spi_mosi","spi_miso","spi_clk","spi_cs"]},
-    {name:"SDMMC", roles:["sd_clk","sd_cmd","sd_d0","sd_d1","sd_d2","sd_d3"]},
-    {name:"USB",   roles:["usb_dm","usb_dp"]},
-    {name:"Buttons",roles:["boot_btn"]},
-  ];
-  buses.forEach(b=>{
-    html+=`<div class="grp"><div class="gh">${b.name}</div>`;
-    b.roles.forEach(r=>{
-      const pins=PINS.filter(p=>state[p.pin]===r).map(p=>p.name);
-      let cls="no",where="not assigned";
-      if(pins.length===1){cls="ok"; where=pins[0];}
-      else if(pins.length>1){cls="dup"; where="DUP: "+pins.join(", ");}
-      html+=`<div class="cl"><span class="dot ${cls}"></span>${FN[r].label}<span class="where">${where}</span></div>`;
+  GROUP_ORDER.filter(g=>g!=="Spare").forEach(g=>{
+    const items=SIGNALS.filter(s=>s.group===g);
+    if(!items.length) return;
+    html+=`<div class="grp"><div class="gh"><span class="swatch" style="background:${CAP_COLOR[items[0].cap]}"></span>${g}</div>`;
+    items.forEach(s=>{
+      const fn=FN[s.id], at=pinOfSignal(s.id);
+      // candidate pins: editable + capability ok
+      const cands=PINS.filter(p=>!isLocked(p.pin) && capOK(p,fn));
+      let opts=`<option value=""${at==null?" selected":""}>— unplaced —</option>`;
+      cands.forEach(p=>{
+        const occ=state[p.pin]; const occName=(occ!=="unassigned"&&occ!==s.id)?`  ⟵ ${FN[occ].label}`:"";
+        opts+=`<option value="${p.pin}"${at===p.pin?" selected":""}>pin ${p.pin} · ${p.name}${occName}</option>`;
+      });
+      const dup = at!=null && PINS.filter(p=>state[p.pin]===s.id).length>1;
+      html+=`<div class="sig ${at!=null?'placed':''} ${dup?'err':''}">
+        <span class="sname"><span class="dot" style="background:${fn.color}"></span><span>${s.id}${fn.cap==='adc'?' <span class="badge adc">ADC1</span>':''}</span></span>
+        <select data-sig="${s.id}">${opts}</select></div>`;
     });
     html+=`</div>`;
   });
   c.innerHTML=html;
+  c.querySelectorAll("select[data-sig]").forEach(sel=>{
+    sel.addEventListener("change",e=>assignSignalToPin(e.target.dataset.sig, e.target.value));
+  });
 }
 
+/* ======================= RENDER: VALIDATION + ASSIGNMENTS ======================= */
+function renderWarnings(list){
+  const w=document.getElementById("warnpanel");
+  if(!list.length){ w.innerHTML=`<h2>Validation</h2><div class="empty">✓ No issues.</div>`; return; }
+  const e=list.filter(x=>x.level==="err").length, wn=list.length-e;
+  let html=`<h2>Validation · ${e} blocking, ${wn} warnings</h2>`;
+  list.forEach(x=>html+=`<div class="msg ${x.level}"><b>${PIN[x.pin].name}</b> (pin ${x.pin}) — ${x.text}</div>`);
+  w.innerHTML=html;
+}
 function renderAssignments(){
   const a=document.getElementById("assignments");
-  let html=`<h2>Assignments by function</h2>`;
   const groups={};
-  PINS.forEach(p=>{
-    const id=state[p.pin]; if(id==="unassigned") return;
-    const g=FN[id].group;
-    (groups[g]=groups[g]||[]).push({p,id});
-  });
-  const order=["General","Analog","I2C","SPI","SDMMC","USB","Buttons","Power","Reserved"];
+  PINS.forEach(p=>{ const id=state[p.pin]; if(id==="unassigned") return; (groups[FN[id].group]=groups[FN[id].group]||[]).push({p,id}); });
+  const order=[...GROUP_ORDER,"USB","Reset","Power","Reserved"];
   const keys=Object.keys(groups).sort((x,y)=>order.indexOf(x)-order.indexOf(y));
+  let html=`<h2>Assignments by function</h2>`;
   if(!keys.length){ a.innerHTML=html+`<div class="empty">Nothing assigned yet.</div>`; return; }
   keys.forEach(g=>{
-    const col=FN[groups[g][0].id].color||"#666";
-    html+=`<div class="grp"><div class="gh"><span class="swatch" style="background:${col}"></span>${g}</div><div class="alist">`;
+    html+=`<div class="grp"><div class="gh"><span class="swatch" style="background:${grpColor(groups[g][0].id)}"></span>${g}</div>`;
     groups[g].sort((m,n)=>m.p.pin-n.p.pin).forEach(({p,id})=>{
-      html+=`<div class="arow"><span>${FN[id].label}</span><span class="p">${p.name} · pin ${p.pin}${p.gpio!=null?" · GPIO"+p.gpio:""}</span></div>`;
+      html+=`<div class="sig"><span class="sname"><span>${FN[id].label}</span></span><span class="badge-pin" style="color:var(--muted);font-size:11px">${p.name} · pin ${p.pin}</span></div>`;
     });
-    html+=`</div></div>`;
+    html+=`</div>`;
   });
   a.innerHTML=html;
 }
 
 function renderAll(){
   const {issues,list}=validate();
-  renderBoard(issues);
-  renderDetail(issues);
-  renderWarnings(list);
-  renderChecklist();
-  renderAssignments();
-  ["adc","strap","safe"].forEach(k=>{
-    document.getElementById("hl-"+k).classList.toggle("active", highlight===k);
-  });
+  renderBoard(issues); renderDetail(issues); renderReq(); renderWarnings(list); renderAssignments();
+  ["adc","strap","safe"].forEach(k=>document.getElementById("hl-"+k).classList.toggle("active", highlight===k));
 }
 
 /* ======================= IMPORT / EXPORT / SUMMARY ======================= */
 function exportJSON(){
   const assignments={};
   PINS.forEach(p=>{ if(!isLocked(p.pin) && state[p.pin]!=="unassigned") assignments[p.pin]=state[p.pin]; });
-  const data={module:"ESP32-S3-WROOM-1-N8R8", tool:"esp32-s3-pin-allocator", version:1, assignments};
-  const blob=new Blob([JSON.stringify(data,null,2)],{type:"application/json"});
-  const url=URL.createObjectURL(blob);
-  const a=document.createElement("a");
-  a.href=url; a.download="esp32s3-pin-allocation.json"; a.click();
-  URL.revokeObjectURL(url);
+  const data={module:"ESP32-S3-WROOM-1-N8R8", board:"de-link", tool:"esp32-s3-pin-allocator", version:2, assignments};
+  const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:"application/json"}));
+  const a=document.createElement("a"); a.href=url; a.download="delink-pin-allocation.json"; a.click(); URL.revokeObjectURL(url);
 }
 function importJSON(){
-  const inp=document.createElement("input");
-  inp.type="file"; inp.accept="application/json,.json";
+  const inp=document.createElement("input"); inp.type="file"; inp.accept="application/json,.json";
   inp.addEventListener("change",()=>{
-    const f=inp.files[0]; if(!f) return;
-    const r=new FileReader();
-    r.onload=()=>{
-      try{
-        const data=JSON.parse(r.result);
-        const asg=data.assignments||{};
-        // reset editable pins, keep locked defaults
-        PINS.forEach(p=>{ if(!isLocked(p.pin)) state[p.pin]="unassigned"; });
-        Object.entries(asg).forEach(([pin,fn])=>{
-          const pn=Number(pin);
-          if(PIN[pn] && !isLocked(pn) && FN[fn]) state[pn]=fn;
-        });
-        selected=null; renderAll();
-      }catch(e){ alert("Import failed: "+e.message); }
-    };
+    const f=inp.files[0]; if(!f) return; const r=new FileReader();
+    r.onload=()=>{ try{
+      const data=JSON.parse(r.result), asg=data.assignments||{};
+      PINS.forEach(p=>{ if(!isLocked(p.pin)) state[p.pin]="unassigned"; });
+      Object.entries(asg).forEach(([pin,fn])=>{ const pn=Number(pin); if(PIN[pn]&&!isLocked(pn)&&FN[fn]) state[pn]=fn; });
+      selected=null; renderAll();
+    }catch(e){ alert("Import failed: "+e.message); } };
     r.readAsText(f);
   });
   inp.click();
 }
 function summaryMarkdown(){
-  let md=`# ESP32-S3-WROOM-1 (N8R8) pin allocation\n\n`;
-  md+=`| Pin | Name | GPIO | Edge | Class | Function | Notes |\n`;
-  md+=`|----|------|------|------|-------|----------|-------|\n`;
+  let md=`# ESP32-S3-WROOM-1 (N8R8) — de-link pin allocation\n\n| Pin | Name | GPIO | Edge | Class | Function | Notes |\n|----|------|------|------|-------|----------|-------|\n`;
   PINS.forEach(p=>{
-    const fn=FN[state[p.pin]];
-    const notes=[];
+    const fn=FN[state[p.pin]], notes=[];
     if(p.adc1) notes.push("ADC1");
     if(STRAP_GPIOS.includes(p.gpio)) notes.push("strapping");
     if(p.note) notes.push(p.note);
-    md+=`| ${p.pin} | ${p.name} | ${p.gpio!=null?p.gpio:"—"} | ${p.edge} | ${p.cls} | ${fn.id==="unassigned"?"—":fn.label} | ${notes.join("; ")} |\n`;
+    md+=`| ${p.pin} | ${p.name} | ${p.gpio!=null?p.gpio:"—"} | ${p.edge} | ${p.cls} | ${state[p.pin]==="unassigned"?"—":fn.label} | ${notes.join("; ")} |\n`;
   });
+  const unplaced=SIGNALS.filter(s=>pinOfSignal(s.id)==null).map(s=>s.id);
+  if(unplaced.length) md+=`\n**Unplaced signals:** ${unplaced.join(", ")}\n`;
   const {list}=validate();
-  if(list.length){
-    md+=`\n## Validation\n\n`;
-    list.forEach(x=>{ md+=`- ${x.level==="err"?"⛔":"⚠"} **${PIN[x.pin].name}** (pin ${x.pin}): ${x.text}\n`; });
-  }
+  if(list.length){ md+=`\n## Validation\n\n`; list.forEach(x=>md+=`- ${x.level==="err"?"⛔":"⚠"} **${PIN[x.pin].name}** (pin ${x.pin}): ${x.text}\n`); }
   return md;
 }
 function copySummary(){
   const md=summaryMarkdown();
-  navigator.clipboard.writeText(md).then(
-    ()=>flash("btn-md","Copied!"),
-    ()=>{ // fallback
-      const ta=document.createElement("textarea"); ta.value=md; document.body.appendChild(ta);
-      ta.select(); document.execCommand("copy"); ta.remove(); flash("btn-md","Copied!");
-    }
-  );
+  navigator.clipboard.writeText(md).then(()=>flash("btn-md","Copied!"),()=>{
+    const ta=document.createElement("textarea"); ta.value=md; document.body.appendChild(ta); ta.select(); document.execCommand("copy"); ta.remove(); flash("btn-md","Copied!");
+  });
 }
-function flash(id,txt){ const b=document.getElementById(id); const o=b.textContent; b.textContent=txt; setTimeout(()=>b.textContent=o,1200); }
+function flash(id,txt){ const b=document.getElementById(id),o=b.textContent; b.textContent=txt; setTimeout(()=>b.textContent=o,1200); }
 
 /* ======================= WIRING ======================= */
 document.getElementById("btn-export").onclick=exportJSON;
 document.getElementById("btn-import").onclick=importJSON;
 document.getElementById("btn-md").onclick=copySummary;
 document.getElementById("btn-reset").onclick=()=>{ if(confirm("Clear all editable assignments?")){ initState(); selected=null; renderAll(); } };
-["adc","strap","safe"].forEach(k=>{
-  document.getElementById("hl-"+k).onclick=()=>{ highlight=highlight===k?null:k; renderAll(); };
-});
+["adc","strap","safe"].forEach(k=>document.getElementById("hl-"+k).onclick=()=>{ highlight=highlight===k?null:k; renderAll(); });
 
 initState();
 renderAll();
