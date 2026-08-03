@@ -74,9 +74,7 @@
   .bottom .pin .badges{justify-content:center}
   .badge{font-size:8.5px; padding:0 4px; border-radius:3px; border:1px solid; line-height:1.5}
   .badge.adc{color:#c4b5fd; border-color:#7c3aed}
-  .badge.fspi{color:#fdba74; border-color:#ea580c}
   .badge.strap{color:#fcd34d; border-color:#d97706}
-  .badge.pref{background:#ea580c; color:#fff; border-color:#ea580c; font-weight:700}
   /* class left-border accent */
   .pin[data-cls="power/gnd"]{border-left-color:var(--c-power); border-left-width:5px}
   .pin[data-cls="reset"]{border-left-color:var(--c-reset); border-left-width:5px}
@@ -150,7 +148,6 @@
   </div>
   <div class="toolbar">
     <button id="hl-adc">Highlight ADC1</button>
-    <button id="hl-fspi">Highlight FSPI</button>
     <button id="hl-strap">Highlight strapping</button>
     <button id="hl-safe">Highlight free-safe</button>
     <button id="btn-export">Export JSON</button>
@@ -377,18 +374,12 @@ function pinEl(p, issues){
   if(highlight){
     let match=false;
     if(highlight==="adc") match=p.adc1;
-    else if(highlight==="fspi") match=!!p.fspi;
     else if(highlight==="strap") match=STRAP_GPIOS.includes(p.gpio);
     else if(highlight==="safe") match=(p.cls==="safe" && state[p.pin]==="unassigned");
     el.classList.add(match?"hl":"dim");
   }
-  // SPI preferred highlight when selected pin is being assigned an SPI role
-  const selFn = selected!=null ? FN[state[selected]] : null;
-  const showPref = selFn && selFn.spi && p.fspi;
-
   let badges="";
   if(p.adc1) badges+=`<span class="badge adc">ADC1</span>`;
-  if(p.fspi) badges+=`<span class="badge ${showPref?'pref':'fspi'}">${showPref?'FSPI★':'FSPI'}</span>`;
   if(STRAP_GPIOS.includes(p.gpio)) badges+=`<span class="badge strap">STRAP</span>`;
 
   el.innerHTML=`
@@ -433,7 +424,6 @@ function renderDetail(issues){
     <div class="row"><span class="k">GPIO</span><span>${p.gpio!=null?p.gpio:"—"}</span></div>
     <div class="row"><span class="k">Class</span><span>${p.cls}</span></div>
     <div class="row"><span class="k">ADC1 capable</span><span>${p.adc1?"yes":"no"}</span></div>
-    <div class="row"><span class="k">Native FSPI role</span><span>${p.fspi||"—"}</span></div>
     <div class="row"><span class="k">Strapping</span><span>${STRAP_GPIOS.includes(p.gpio)?"yes":"no"}</span></div>
     ${p.note?`<div class="row"><span class="k">Note</span><span>${p.note}</span></div>`:""}
   `;
@@ -442,7 +432,6 @@ function renderDetail(issues){
   } else {
     const opts=selectableFor(p).map(f=>`<option value="${f.id}" ${state[selected]===f.id?"selected":""}>${f.label}</option>`).join("");
     html+=`<select id="fnselect">${opts}</select>`;
-    if(p.fspi) html+=`<div class="hint">★ Native FSPI pin (${p.fspi}) — preferred for high-speed SPI routing.</div>`;
     html+=`<div class="hint">I2C/SPI/SDMMC have no dedicated pins on the S3 — any safe GPIO works via the GPIO matrix; cluster them physically for clean routing.</div>`;
   }
   iss.errors.forEach(t=>html+=`<div class="msg err">⛔ ${t}</div>`);
@@ -529,7 +518,7 @@ function renderAll(){
   renderWarnings(list);
   renderChecklist();
   renderAssignments();
-  ["adc","fspi","strap","safe"].forEach(k=>{
+  ["adc","strap","safe"].forEach(k=>{
     document.getElementById("hl-"+k).classList.toggle("active", highlight===k);
   });
 }
@@ -575,7 +564,6 @@ function summaryMarkdown(){
   PINS.forEach(p=>{
     const fn=FN[state[p.pin]];
     const notes=[];
-    if(p.fspi) notes.push(p.fspi);
     if(p.adc1) notes.push("ADC1");
     if(STRAP_GPIOS.includes(p.gpio)) notes.push("strapping");
     if(p.note) notes.push(p.note);
@@ -605,7 +593,7 @@ document.getElementById("btn-export").onclick=exportJSON;
 document.getElementById("btn-import").onclick=importJSON;
 document.getElementById("btn-md").onclick=copySummary;
 document.getElementById("btn-reset").onclick=()=>{ if(confirm("Clear all editable assignments?")){ initState(); selected=null; renderAll(); } };
-["adc","fspi","strap","safe"].forEach(k=>{
+["adc","strap","safe"].forEach(k=>{
   document.getElementById("hl-"+k).onclick=()=>{ highlight=highlight===k?null:k; renderAll(); };
 });
 
