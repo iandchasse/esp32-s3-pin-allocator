@@ -237,37 +237,52 @@ const STRAP_GPIOS = [0,3,45,46];
    pre-attached to a GPIO. Edit this list to add/rename/re-categorise signals.
    cap drives validation & colour:  adc (needs ADC1) | i2c | spi | sdmmc | uart | gpio        */
 const CAP_COLOR = {adc:"#a855f7", i2c:"#22c55e", spi:"#06b6d4", sdmmc:"#eab308", uart:"#64748b", gpio:"#0ea5e9"};
-const GROUP_ORDER = ["Analog","LED","Power/Ctrl","I2C","UART","microSD","E-paper","Spare"];
+const GROUP_ORDER = ["Fixed","Comms","E-paper","Front-light","Touch","microSD","Analog","Power/Ctrl","Spare"];
+// module pin -> signal for non-negotiables that already have a defined location (pre-placed & locked).
+// UART0 follows the S3 IO_MUX default: U0TXD=GPIO43 (pin36), U0RXD=GPIO44 (pin37).
+const FIXED = {27:"BOOT", 36:"UART_TX", 37:"UART_RX"};
 const SIGNALS = [
-  {id:"BAT_MONIT",    group:"Analog",     cap:"adc"},
-  {id:"BUTTON_ADC_1", group:"Analog",     cap:"adc"},
-  {id:"BUTTON_ADC_2", group:"Analog",     cap:"adc"},
-  {id:"PWM_LED",      group:"LED",        cap:"gpio"},
-  {id:"COLOR_SEL",    group:"LED",        cap:"gpio"},
-  {id:"LED_LATCH",    group:"LED",        cap:"gpio"},
-  {id:"USB_STAT",     group:"Power/Ctrl", cap:"gpio"},
-  {id:"PWR_BUTTON",   group:"Power/Ctrl", cap:"gpio"},
-  {id:"SDA",          group:"I2C",        cap:"i2c"},
-  {id:"SCL",          group:"I2C",        cap:"i2c"},
-  {id:"UART_TX",      group:"UART",       cap:"uart"},
-  {id:"UART_RX",      group:"UART",       cap:"uart"},
-  {id:"SD_CLK",       group:"microSD",    cap:"sdmmc"},
-  {id:"SD_CMD",       group:"microSD",    cap:"sdmmc"},
-  {id:"SD_DAT0",      group:"microSD",    cap:"sdmmc"},
-  {id:"SD_DAT1",      group:"microSD",    cap:"sdmmc"},
-  {id:"SD_DAT2",      group:"microSD",    cap:"sdmmc"},
-  {id:"SD_DAT3",      group:"microSD",    cap:"sdmmc"},
-  {id:"EPD_SCK",      group:"E-paper",    cap:"spi"},
-  {id:"EPD_MOSI",     group:"E-paper",    cap:"spi"},
-  {id:"EPD_CS",       group:"E-paper",    cap:"spi"},
-  {id:"EPD_DC",       group:"E-paper",    cap:"gpio"},
-  {id:"EPD_RST",      group:"E-paper",    cap:"gpio"},
-  {id:"EPD_BUSY",     group:"E-paper",    cap:"gpio"},
+  // ---- Non-negotiable, pre-placed at a fixed pin (see FIXED) ----
+  {id:"BOOT",         group:"Fixed",       cap:"gpio", fixedPin:27},
+  {id:"UART_TX",      group:"Fixed",       cap:"uart", fixedPin:36},
+  {id:"UART_RX",      group:"Fixed",       cap:"uart", fixedPin:37},
+  // ---- Regular communication buses ----
+  {id:"I2C_SDA",      group:"Comms",       cap:"i2c"},
+  {id:"I2C_SCL",      group:"Comms",       cap:"i2c"},
+  {id:"SPI_CS",       group:"Comms",       cap:"spi"},
+  {id:"SPI_MISO",     group:"Comms",       cap:"spi"},
+  {id:"SPI_MOSI",     group:"Comms",       cap:"spi"},
+  {id:"SPI_SCK",      group:"Comms",       cap:"spi"},
+  // ---- E-paper control lines (the panel shares the SPI bus above) ----
+  {id:"EPD_DC",       group:"E-paper",     cap:"gpio"},
+  {id:"EPD_RST",      group:"E-paper",     cap:"gpio"},
+  {id:"EPD_BUSY",     group:"E-paper",     cap:"gpio"},
+  // ---- Front-light (AP3031) ----
+  {id:"PWM_LED",      group:"Front-light", cap:"gpio"},
+  {id:"COLOR_SEL",    group:"Front-light", cap:"gpio"},
+  {id:"LED_ACTIVATE", group:"Front-light", cap:"gpio"},
+  // ---- Capacitive touch (FT6336U) ----
+  {id:"TP_RST",       group:"Touch",       cap:"gpio"},
+  {id:"TP_INT",       group:"Touch",       cap:"gpio"},
+  // ---- microSD (4-bit SDIO) ----
+  {id:"SD_CLK",       group:"microSD",     cap:"sdmmc"},
+  {id:"SD_CMD",       group:"microSD",     cap:"sdmmc"},
+  {id:"SD_DAT0",      group:"microSD",     cap:"sdmmc"},
+  {id:"SD_DAT1",      group:"microSD",     cap:"sdmmc"},
+  {id:"SD_DAT2",      group:"microSD",     cap:"sdmmc"},
+  {id:"SD_DAT3",      group:"microSD",     cap:"sdmmc"},
+  // ---- Analog (ADC1 only) ----
+  {id:"BUTTON_ADC_1", group:"Analog",      cap:"adc"},
+  {id:"BUTTON_ADC_2", group:"Analog",      cap:"adc"},
+  {id:"BAT_MONIT",    group:"Analog",      cap:"adc"},
+  // ---- Power / USB detection ----
+  {id:"PWR_BUTTON",   group:"Power/Ctrl",  cap:"gpio"},
+  {id:"USB_STAT",     group:"Power/Ctrl",  cap:"gpio"},
 ];
 
 /* Assignable-function catalog = signals + generic spare + locked (module-fixed) entries. */
 const FN = {};
-SIGNALS.forEach(s=>{ FN[s.id]={id:s.id, label:s.id, group:s.group, cap:s.cap, color:CAP_COLOR[s.cap], unique:true}; });
+SIGNALS.forEach(s=>{ FN[s.id]={id:s.id, label:s.id, group:s.group, cap:s.cap, color:CAP_COLOR[s.cap], unique:true, fixed:!!s.fixedPin}; });
 FN["unassigned"] = {id:"unassigned", label:"Unassigned", group:"—", color:null};
 FN["spare_gpio"] = {id:"spare_gpio", label:"Spare GPIO → header", group:"Spare", cap:"gpio", color:"#475569", unique:false};
 FN["power"]      = {id:"power", label:"Power / GND", group:"Power", color:"var(--c-power)", locked:true};
@@ -295,6 +310,8 @@ function initState(){
     if(LOCKED_CLASSES.includes(p.cls)) lockedDefault[p.pin]=fn;
     state[p.pin]=fn;
   });
+  // Pre-place & lock the design non-negotiables that have a defined location.
+  Object.entries(FIXED).forEach(([pin,sig])=>{ const pn=Number(pin); state[pn]=sig; lockedDefault[pn]=sig; });
 }
 const isLocked = pin => pin in lockedDefault;
 const pinOfSignal = id => PINS.find(p=>state[p.pin]===id)?.pin ?? null;
@@ -405,7 +422,12 @@ function renderDetail(issues){
     <div class="row"><span class="k">Strapping</span><span>${STRAP_GPIOS.includes(p.gpio)?"yes":"no"}</span></div>
     ${p.note?`<div class="row"><span class="k">Note</span><span>${p.note}</span></div>`:""}`;
   if(isLocked(selected)){
-    html+=`<div class="hint">🔒 Pre-locked (${FN[state[selected]].label}) and not editable — fixed by the module (power/GND, EN/reset, native USB D±, or Octal-PSRAM reserved).</div>`;
+    const a=state[selected];
+    const moduleFixed=["power","en_rst_btn","psram","usb_dm","usb_dp"].includes(a);
+    const why = moduleFixed
+      ? "fixed by the module (power/GND, EN/reset, native USB D±, or Octal-PSRAM reserved)"
+      : "a board non-negotiable with a defined location (BOOT on GPIO0, UART0 on GPIO43/44) — edit the FIXED map in source to change it";
+    html+=`<div class="hint">🔒 Pre-locked (${FN[a].label}) and not editable — ${why}.</div>`;
   } else {
     const cur=state[selected];
     let opts=`<option value="unassigned"${cur==="unassigned"?" selected":""}>Unassigned</option>`;
@@ -454,6 +476,11 @@ function renderReq(){
     html+=`<div class="grp"><div class="gh"><span class="swatch" style="background:${CAP_COLOR[items[0].cap]}"></span>${g}</div>`;
     items.forEach(s=>{
       const fn=FN[s.id], at=pinOfSignal(s.id);
+      if(fn.fixed){   // non-negotiable: show its locked pin, no selector
+        html+=`<div class="sig placed"><span class="sname"><span class="dot" style="background:${fn.color}"></span><span>${s.id}</span></span>`
+            + `<span class="badge-pin" style="color:#86efac;font-size:11.5px;white-space:nowrap">🔒 ${at!=null?"pin "+at+" · "+PIN[at].name:"—"}</span></div>`;
+        return;
+      }
       // candidate pins: editable + capability ok
       const cands=PINS.filter(p=>!isLocked(p.pin) && capOK(p,fn));
       let opts=`<option value=""${at==null?" selected":""}>— unplaced —</option>`;
