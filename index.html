@@ -266,8 +266,8 @@ const FUNCTIONS = [
   {id:"sd_d1",      label:"SDMMC D1",       group:"SDMMC",    color:"var(--g-sd)",    selectable:true, unique:true, driven:true},
   {id:"sd_d2",      label:"SDMMC D2",       group:"SDMMC",    color:"var(--g-sd)",    selectable:true, unique:true, driven:true},
   {id:"sd_d3",      label:"SDMMC D3",       group:"SDMMC",    color:"var(--g-sd)",    selectable:true, unique:true, driven:true},
-  {id:"usb_dm",     label:"USB D-",         group:"USB",      color:"var(--g-usb)",   selectable:true, unique:true, fixedGpio:19, driven:true},
-  {id:"usb_dp",     label:"USB D+",         group:"USB",      color:"var(--g-usb)",   selectable:true, unique:true, fixedGpio:20, driven:true},
+  {id:"usb_dm",     label:"USB D-",         group:"USB",      color:"var(--g-usb)",   selectable:false, unique:true, locked:true, fixedGpio:19, driven:true},
+  {id:"usb_dp",     label:"USB D+",         group:"USB",      color:"var(--g-usb)",   selectable:false, unique:true, locked:true, fixedGpio:20, driven:true},
   {id:"boot_btn",   label:"BOOT button",    group:"Buttons",  color:"var(--g-buttons)", selectable:true, unique:true, fixedGpio:0},
   {id:"en_rst_btn", label:"EN / RST button",group:"Buttons",  color:"var(--g-buttons)", selectable:false, unique:true, locked:true},
   {id:"power",      label:"Power / GND",    group:"Power",    color:"var(--g-reserved)", selectable:false, locked:true},
@@ -282,6 +282,8 @@ let lockedDefault = {};   // pin -> function id (fixed, non-editable)
 let selected = null;      // pin number
 let highlight = null;     // 'adc'|'fspi'|'strap'|'safe'|null
 
+// Pins whose function is fixed by the module itself (not a design choice) — pre-locked, non-editable.
+const LOCKED_CLASSES = ["power/gnd","reset","psram-reserved","usb"];
 function initState(){
   lockedDefault = {};
   PINS.forEach(p=>{
@@ -289,7 +291,8 @@ function initState(){
     if(p.cls==="power/gnd") fn="power";
     else if(p.cls==="reset") fn="en_rst_btn";
     else if(p.cls==="psram-reserved") fn="psram";
-    if(FN[fn].locked) lockedDefault[p.pin]=fn;
+    else if(p.cls==="usb") fn = (p.gpio===19 ? "usb_dm" : "usb_dp");
+    if(LOCKED_CLASSES.includes(p.cls)) lockedDefault[p.pin]=fn;
     state[p.pin]=fn;
   });
 }
@@ -428,7 +431,7 @@ function renderDetail(issues){
     ${p.note?`<div class="row"><span class="k">Note</span><span>${p.note}</span></div>`:""}
   `;
   if(isLocked(selected)){
-    html+=`<div class="hint">🔒 This pin is pre-locked (${FN[state[selected]].label}) and not editable — it is a power, reset, or PSRAM-reserved pin.</div>`;
+    html+=`<div class="hint">🔒 This pin is pre-locked (${FN[state[selected]].label}) and not editable — it is fixed by the module (power/GND, EN/reset, native USB D±, or Octal-PSRAM reserved).</div>`;
   } else {
     const opts=selectableFor(p).map(f=>`<option value="${f.id}" ${state[selected]===f.id?"selected":""}>${f.label}</option>`).join("");
     html+=`<select id="fnselect">${opts}</select>`;
