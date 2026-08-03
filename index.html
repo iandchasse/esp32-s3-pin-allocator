@@ -131,6 +131,16 @@
   .legend{display:flex; flex-wrap:wrap; gap:7px 14px}
   .legend .li{display:flex; align-items:center; gap:6px; font-size:11.5px}
   .legend .box{width:12px; height:12px; border-radius:3px; border-left:4px solid}
+  .badge.hdr{color:#67e8f9; border-color:#0891b2}
+  /* dev header config */
+  .hcfg{display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:10px; font-size:12px; color:var(--muted)}
+  .hcfg input{width:50px; padding:4px 6px; background:var(--panel2); color:var(--text); border:1px solid var(--border); border-radius:5px}
+  .hgrid{display:grid; gap:6px}
+  .hslot{border:1px solid var(--border); border-radius:7px; padding:6px 5px; background:var(--panel2); display:flex; flex-direction:column; gap:3px; min-width:0}
+  .hslot .hnum{font-size:9.5px; color:var(--muted); white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .hslot .htag{font-size:11px; font-weight:650; color:#fff; border-radius:4px; padding:2px 3px; text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .hslot .hsub{font-size:9px; color:var(--muted); text-align:center; white-space:nowrap; overflow:hidden; text-overflow:ellipsis}
+  .hslot select{margin-top:2px; padding:3px 2px; font-size:10.5px}
   textarea{width:100%; min-height:120px; background:var(--panel2); color:var(--text); border:1px solid var(--border); border-radius:6px; font:12px/1.4 ui-monospace,Menlo,Consolas,monospace; padding:8px}
 </style>
 </head>
@@ -172,6 +182,7 @@
         <div class="li"><span class="box" style="border-left-color:var(--c-reset)"></span>reset / EN (locked)</div>
       </div>
     </div>
+    <div class="card" id="header" style="margin-top:14px"></div>
   </div>
 
   <div class="side">
@@ -290,6 +301,11 @@ FN["en_rst_btn"] = {id:"en_rst_btn", label:"EN / RST", group:"Reset", color:"var
 FN["psram"]      = {id:"psram", label:"PSRAM (reserved)", group:"Reserved", color:"var(--c-psram)", locked:true};
 FN["usb_dm"]     = {id:"usb_dm", label:"USB D-", group:"USB", color:"var(--c-usb)", locked:true};
 FN["usb_dp"]     = {id:"usb_dp", label:"USB D+", group:"USB", color:"var(--c-usb)", locked:true};
+const SIG_IDS = new Set(SIGNALS.map(s=>s.id));
+
+/* Dev-header (PPPC062 = 2x6) config. Board-level nets (not on the ESP) get their own colours.
+   A slot value is: a board net key (below) | a signal id (taps that net) | "pin:N" (taps a raw pin). */
+const HDR_BOARD = {"3V3":"#b91c1c","GND":"#4b5563","LED+":"#d97706","C-":"#3b82f6","W-":"#f97316"};
 
 const LOCKED_CLASSES = ["power/gnd","reset","psram-reserved","usb"];
 
@@ -298,6 +314,12 @@ let state = {};           // pin -> function/signal id
 let lockedDefault = {};   // pin -> id (module-fixed, non-editable)
 let selected = null;
 let highlight = null;     // 'adc'|'strap'|'safe'|null
+let hdrPinSet = new Set(); // module pins tapped by the dev header (for the HDR badge)
+// GPIO3 = pin 15 (the benign strapping pin, used as the header SPI chip-select)
+let headerCfg = { rows:2, cols:6, slots:[
+  "3V3","GND","I2C_SDA","I2C_SCL","SPI_SCK","SPI_MISO",
+  "LED+","W-","C-","GND","SPI_MOSI","pin:15"
+]};
 
 function initState(){
   lockedDefault = {};
@@ -374,6 +396,7 @@ function pinEl(p, issues){
   let badges="";
   if(p.adc1) badges+=`<span class="badge adc">ADC1</span>`;
   if(STRAP_GPIOS.includes(p.gpio)) badges+=`<span class="badge strap">STRAP</span>`;
+  if(hdrPinSet.has(p.pin)) badges+=`<span class="badge hdr">HDR</span>`;
 
   const a=state[p.pin];
   const fnHtml = (a!=="unassigned") ? `<span class="fn" style="background:${grpColor(a)}">${FN[a].label}</span>` : "";
@@ -528,9 +551,66 @@ function renderAssignments(){
   a.innerHTML=html;
 }
 
+/* ======================= DEV HEADER CONFIG ======================= */
+function headerPins(){
+  const s=new Set();
+  headerCfg.slots.forEach(v=>{
+    if(!v) return;
+    if(v.startsWith("pin:")) s.add(Number(v.slice(4)));
+    else if(SIG_IDS.has(v)){ const at=pinOfSignal(v); if(at!=null) s.add(at); }
+  });
+  return s;
+}
+function headerSlotInfo(v){
+  if(!v) return {label:"—", color:"#31374a", sub:"empty"};
+  if(v in HDR_BOARD) return {label:v, color:HDR_BOARD[v], sub:(v==="LED+")?"boost out · HV":((v==="C-"||v==="W-")?"LED return":"")};
+  if(v.startsWith("pin:")){ const p=PIN[Number(v.slice(4))]; const st=state[p.pin];
+    return {label:p.name.replace("GPIO","IO"), color:"#0ea5e9", sub: st!=="unassigned"?FN[st].label:"spare GPIO"}; }
+  const fn=FN[v], at=pinOfSignal(v);
+  return {label:v, color:fn?fn.color:"#0ea5e9", sub: at!=null?PIN[at].name.replace("GPIO","IO"):"⚠ unplaced"};
+}
+function headerOptions(cur){
+  let o=`<option value=""${!cur?" selected":""}>— empty —</option><optgroup label="Power / board">`;
+  Object.keys(HDR_BOARD).forEach(n=>o+=`<option value="${n}"${cur===n?" selected":""}>${n}</option>`);
+  o+=`</optgroup><optgroup label="Signals (tap the net)">`;
+  SIGNALS.forEach(s=>{ const at=pinOfSignal(s.id); o+=`<option value="${s.id}"${cur===s.id?" selected":""}>${s.id}${at!=null?" · "+PIN[at].name:" · unplaced"}</option>`; });
+  o+=`</optgroup><optgroup label="Spare / raw pins">`;
+  PINS.filter(p=>!isLocked(p.pin)&&p.gpio!=null&&state[p.pin]==="unassigned").forEach(p=>o+=`<option value="pin:${p.pin}"${cur==="pin:"+p.pin?" selected":""}>${p.name} · spare</option>`);
+  o+=`</optgroup>`;
+  if(cur && !o.includes(`value="${cur}"`)){ const info=headerSlotInfo(cur); o=`<option value="${cur}" selected>${info.label} · current</option>`+o; }
+  return o;
+}
+function renderHeader(){
+  const c=document.getElementById("header");
+  const n=headerCfg.rows*headerCfg.cols;
+  while(headerCfg.slots.length<n) headerCfg.slots.push(null);
+  if(headerCfg.slots.length>n) headerCfg.slots.length=n;
+  const filled=headerCfg.slots.filter(Boolean).length;
+  const unplaced=headerCfg.slots.filter(v=>v&&SIG_IDS.has(v)&&pinOfSignal(v)==null);
+  let html=`<h2>Dev header config <span style="text-transform:none;letter-spacing:0">${filled}/${n} pins</span></h2>`;
+  html+=`<div class="hcfg">Rows <input id="hrows" type="number" min="1" max="2" value="${headerCfg.rows}"> Cols <input id="hcols" type="number" min="1" max="12" value="${headerCfg.cols}">`
+      + `<span style="flex:1;min-width:140px">PPPC062 = 2×6. TX/RX are on separate unpopulated pads; “HDR” badges on the board mark tapped pins.</span></div>`;
+  html+=`<div class="hgrid" style="grid-template-columns:repeat(${headerCfg.cols},minmax(0,1fr))">`;
+  for(let i=0;i<n;i++){
+    const info=headerSlotInfo(headerCfg.slots[i]);
+    const rl=String.fromCharCode(65+Math.floor(i/headerCfg.cols))+((i%headerCfg.cols)+1);
+    html+=`<div class="hslot"><div class="hnum">${rl} · #${i+1}</div>`
+        + `<div class="htag" style="background:${info.color}">${info.label}</div>`
+        + `<div class="hsub">${info.sub}</div>`
+        + `<select data-slot="${i}">${headerOptions(headerCfg.slots[i])}</select></div>`;
+  }
+  html+=`</div>`;
+  if(unplaced.length) html+=`<div class="msg warn" style="margin-top:10px">⚠ On the header but not yet placed on a pin: ${unplaced.join(", ")}</div>`;
+  c.innerHTML=html;
+  document.getElementById("hrows").onchange=e=>{ headerCfg.rows=Math.max(1,Math.min(2,+e.target.value||2)); renderAll(); };
+  document.getElementById("hcols").onchange=e=>{ headerCfg.cols=Math.max(1,Math.min(12,+e.target.value||6)); renderAll(); };
+  c.querySelectorAll("select[data-slot]").forEach(s=>s.addEventListener("change",e=>{ headerCfg.slots[+e.target.dataset.slot]=e.target.value||null; renderAll(); }));
+}
+
 function renderAll(){
   const {issues,list}=validate();
-  renderBoard(issues); renderDetail(issues); renderReq(); renderWarnings(list); renderAssignments();
+  hdrPinSet=headerPins();
+  renderBoard(issues); renderDetail(issues); renderReq(); renderWarnings(list); renderAssignments(); renderHeader();
   ["adc","strap","safe"].forEach(k=>document.getElementById("hl-"+k).classList.toggle("active", highlight===k));
 }
 
@@ -538,7 +618,7 @@ function renderAll(){
 function exportJSON(){
   const assignments={};
   PINS.forEach(p=>{ if(!isLocked(p.pin) && state[p.pin]!=="unassigned") assignments[p.pin]=state[p.pin]; });
-  const data={module:"ESP32-S3-WROOM-1-N8R8", board:"de-link", tool:"esp32-s3-pin-allocator", version:2, assignments};
+  const data={module:"ESP32-S3-WROOM-1-N8R8", board:"de-link", tool:"esp32-s3-pin-allocator", version:3, assignments, header:headerCfg};
   const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:"application/json"}));
   const a=document.createElement("a"); a.href=url; a.download="delink-pin-allocation.json"; a.click(); URL.revokeObjectURL(url);
 }
@@ -550,6 +630,7 @@ function importJSON(){
       const data=JSON.parse(r.result), asg=data.assignments||{};
       PINS.forEach(p=>{ if(!isLocked(p.pin)) state[p.pin]="unassigned"; });
       Object.entries(asg).forEach(([pin,fn])=>{ const pn=Number(pin); if(PIN[pn]&&!isLocked(pn)&&FN[fn]) state[pn]=fn; });
+      if(data.header && Array.isArray(data.header.slots)) headerCfg={rows:data.header.rows||2, cols:data.header.cols||6, slots:data.header.slots};
       selected=null; renderAll();
     }catch(e){ alert("Import failed: "+e.message); } };
     r.readAsText(f);
@@ -567,6 +648,11 @@ function summaryMarkdown(){
   });
   const unplaced=SIGNALS.filter(s=>pinOfSignal(s.id)==null).map(s=>s.id);
   if(unplaced.length) md+=`\n**Unplaced signals:** ${unplaced.join(", ")}\n`;
+  md+=`\n## Dev header (${headerCfg.rows}×${headerCfg.cols})\n\n| Pos | Net | Pin / note |\n|-----|-----|-----------|\n`;
+  headerCfg.slots.forEach((v,i)=>{
+    const info=headerSlotInfo(v), rl=String.fromCharCode(65+Math.floor(i/headerCfg.cols))+((i%headerCfg.cols)+1);
+    md+=`| ${rl} | ${v?info.label:"—"} | ${v?info.sub:""} |\n`;
+  });
   const {list}=validate();
   if(list.length){ md+=`\n## Validation\n\n`; list.forEach(x=>md+=`- ${x.level==="err"?"⛔":"⚠"} **${PIN[x.pin].name}** (pin ${x.pin}): ${x.text}\n`); }
   return md;
