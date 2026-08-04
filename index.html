@@ -151,12 +151,14 @@
     <div class="sub">de-link board · 40-pin footprint · Octal PSRAM (R8) · WiFi active (ADC2 unavailable)</div>
   </div>
   <div class="toolbar">
+    <button id="btn-flip">Flip to back-side</button>
     <button id="hl-adc">Highlight ADC1</button>
     <button id="hl-strap">Highlight strapping</button>
     <button id="hl-safe">Highlight free-safe</button>
     <button id="btn-export">Export JSON</button>
     <button id="btn-import">Import JSON</button>
     <button id="btn-md">Copy summary</button>
+    <button id="btn-clear">Clear all</button>
     <button id="btn-reset">Reset to default</button>
   </div>
 </header>
@@ -166,7 +168,7 @@
     <div class="board-wrap">
       <div class="board">
         <div class="col left" id="col-left"></div>
-        <div class="center"><div class="chip"><b>ESP32-S3-WROOM-1</b>N8R8 · Octal PSRAM<br>(component body)</div></div>
+        <div class="center"><div class="chip" id="chip"><b>ESP32-S3-WROOM-1</b>N8R8 · Octal PSRAM<br>(component body)</div></div>
         <div class="col right" id="col-right"></div>
         <div class="bottom" id="row-bottom"></div>
       </div>
@@ -314,6 +316,7 @@ let state = {};           // pin -> function/signal id
 let lockedDefault = {};   // pin -> id (module-fixed, non-editable)
 let selected = null;
 let highlight = null;     // 'adc'|'strap'|'safe'|null
+let flipped = false;      // false = top view (component up); true = back-side (mirrored L-R)
 let hdrPinSet = new Set(); // module pins tapped by the dev header (for the HDR badge)
 // GPIO3 = pin 15 (the benign strapping pin, used as the header SPI chip-select)
 let headerCfg = { rows:2, cols:6, slots:[
@@ -432,9 +435,22 @@ function pinEl(p, issues){
 function renderBoard(issues){
   const L=document.getElementById("col-left"), R=document.getElementById("col-right"), B=document.getElementById("row-bottom");
   L.innerHTML=R.innerHTML=B.innerHTML="";
-  PINS.filter(p=>p.edge==="Left").forEach(p=>L.appendChild(pinEl(p,issues)));
-  PINS.filter(p=>p.edge==="Bottom").forEach(p=>B.appendChild(pinEl(p,issues)));
-  PINS.filter(p=>p.edge==="Right").slice().reverse().forEach(p=>R.appendChild(pinEl(p,issues)));
+  const left=PINS.filter(p=>p.edge==="Left");                 // 1..14
+  const bottom=PINS.filter(p=>p.edge==="Bottom");             // 15..26
+  const right=PINS.filter(p=>p.edge==="Right");               // 27..40
+  if(!flipped){
+    left.forEach(p=>L.appendChild(pinEl(p,issues)));                       // 1..14 top->bottom
+    bottom.forEach(p=>B.appendChild(pinEl(p,issues)));                     // 15..26 left->right
+    right.slice().reverse().forEach(p=>R.appendChild(pinEl(p,issues)));    // 40..27 top->bottom
+  } else {
+    // Back-side view: mirror left<->right; bottom row reverses; vertical order unchanged.
+    right.slice().reverse().forEach(p=>L.appendChild(pinEl(p,issues)));    // 40..27 now on the left
+    bottom.slice().reverse().forEach(p=>B.appendChild(pinEl(p,issues)));   // 26..15
+    left.forEach(p=>R.appendChild(pinEl(p,issues)));                       // 1..14 now on the right
+  }
+  const chip=document.getElementById("chip");
+  if(chip) chip.innerHTML=`<b>ESP32-S3-WROOM-1</b>N8R8 · Octal PSRAM<br>`
+    + `<span style="color:${flipped?'#fbbf24':'var(--muted)'}">${flipped?'⇄ BACK-SIDE view · mirrored L–R':'TOP view · component up'}</span>`;
 }
 
 /* ======================= RENDER: PIN DETAIL ======================= */
@@ -631,6 +647,7 @@ function renderAll(){
   hdrPinSet=headerPins();
   renderBoard(issues); renderDetail(issues); renderReq(); renderWarnings(list); renderAssignments(); renderHeader();
   ["adc","strap","safe"].forEach(k=>document.getElementById("hl-"+k).classList.toggle("active", highlight===k));
+  const fb=document.getElementById("btn-flip"); fb.classList.toggle("active",flipped); fb.textContent=flipped?"Viewing back-side":"Flip to back-side";
   saveLocal();   // persist the current allocation + header to the browser
 }
 
@@ -638,7 +655,7 @@ function renderAll(){
 function currentConfig(){
   const assignments={};
   PINS.forEach(p=>{ if(!isLocked(p.pin) && state[p.pin]!=="unassigned") assignments[p.pin]=state[p.pin]; });
-  return {module:"ESP32-S3-WROOM-1-N8R8", board:"de-link", tool:"esp32-s3-pin-allocator", version:3, assignments, header:headerCfg};
+  return {module:"ESP32-S3-WROOM-1-N8R8", board:"de-link", tool:"esp32-s3-pin-allocator", version:3, flipped, assignments, header:headerCfg};
 }
 function applyConfig(cfg){
   PINS.forEach(p=>{ if(!isLocked(p.pin)) state[p.pin]="unassigned"; });
@@ -646,7 +663,10 @@ function applyConfig(cfg){
   Object.entries(asg).forEach(([pin,fn])=>{ const pn=Number(pin); if(PIN[pn]&&!isLocked(pn)&&FN[fn]) state[pn]=fn; });
   if(cfg&&cfg.header&&Array.isArray(cfg.header.slots))
     headerCfg={rows:cfg.header.rows||2, cols:cfg.header.cols||6, slots:cfg.header.slots.slice()};
+  if(cfg && typeof cfg.flipped==="boolean") flipped=cfg.flipped;
 }
+// Unassign every editable pin, keeping the module-fixed / design-fixed locks.
+function clearAll(){ PINS.forEach(p=>{ if(!isLocked(p.pin)) state[p.pin]="unassigned"; }); }
 function saveLocal(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(currentConfig())); }catch(e){} }
 function loadLocal(){ try{ const s=localStorage.getItem(LS_KEY); return s?JSON.parse(s):null; }catch(e){ return null; } }
 
@@ -696,6 +716,8 @@ function flash(id,txt){ const b=document.getElementById(id),o=b.textContent; b.t
 document.getElementById("btn-export").onclick=exportJSON;
 document.getElementById("btn-import").onclick=importJSON;
 document.getElementById("btn-md").onclick=copySummary;
+document.getElementById("btn-flip").onclick=()=>{ flipped=!flipped; renderAll(); };
+document.getElementById("btn-clear").onclick=()=>{ if(confirm("Un-assign every editable pin? (Locked power/EN/USB/PSRAM and the fixed BOOT/UART pins stay.)")){ clearAll(); selected=null; renderAll(); } };
 document.getElementById("btn-reset").onclick=()=>{ if(confirm("Reset to the default de-link layout? Your current in-browser changes will be replaced (Export first if you want to keep them).")){ applyConfig(DEFAULT_CONFIG); selected=null; renderAll(); } };
 ["adc","strap","safe"].forEach(k=>document.getElementById("hl-"+k).onclick=()=>{ highlight=highlight===k?null:k; renderAll(); });
 
