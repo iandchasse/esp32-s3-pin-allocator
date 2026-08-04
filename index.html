@@ -604,15 +604,19 @@ function renderHeader(){
   const unplaced=headerCfg.slots.filter(v=>v&&SIG_IDS.has(v)&&pinOfSignal(v)==null);
   let html=`<h2>Dev header config <span style="text-transform:none;letter-spacing:0">${filled}/${n} pins</span></h2>`;
   html+=`<div class="hcfg">Rows <input id="hrows" type="number" min="1" max="2" value="${headerCfg.rows}"> Cols <input id="hcols" type="number" min="1" max="12" value="${headerCfg.cols}">`
-      + `<span style="flex:1;min-width:140px">PPPC062 = 2×6. TX/RX are on separate unpopulated pads; “HDR” badges on the board mark tapped pins.</span></div>`;
+      + `<span style="flex:1;min-width:140px">PPPC062 = 2×6 · pin 1 = bottom-left, wraps up to the top row. TX/RX on separate unpopulated pads; “HDR” badges mark tapped pins.</span></div>`;
   html+=`<div class="hgrid" style="grid-template-columns:repeat(${headerCfg.cols},minmax(0,1fr))">`;
-  for(let i=0;i<n;i++){
-    const info=headerSlotInfo(headerCfg.slots[i]);
-    const rl=String.fromCharCode(65+Math.floor(i/headerCfg.cols))+((i%headerCfg.cols)+1);
-    html+=`<div class="hslot"><div class="hnum">${rl} · #${i+1}</div>`
-        + `<div class="htag" style="background:${info.color}">${info.label}</div>`
-        + `<div class="hsub">${info.sub}</div>`
-        + `<select data-slot="${i}">${headerOptions(headerCfg.slots[i])}</select></div>`;
+  // PPPC062 numbering: pin 1 = bottom-left, counts up along the bottom row, then wraps to the
+  // top row (pin cols+1 at top-left). Render the top visual row first so the grid mirrors the part.
+  for(let r=headerCfg.rows-1; r>=0; r--){
+    for(let c=0;c<headerCfg.cols;c++){
+      const i=r*headerCfg.cols+c;                 // slot index = physical pin - 1
+      const info=headerSlotInfo(headerCfg.slots[i]);
+      html+=`<div class="hslot"><div class="hnum">pin ${i+1}</div>`
+          + `<div class="htag" style="background:${info.color}">${info.label}</div>`
+          + `<div class="hsub">${info.sub}</div>`
+          + `<select data-slot="${i}">${headerOptions(headerCfg.slots[i])}</select></div>`;
+    }
   }
   html+=`</div>`;
   if(unplaced.length) html+=`<div class="msg warn" style="margin-top:10px">⚠ On the header but not yet placed on a pin: ${unplaced.join(", ")}</div>`;
@@ -671,10 +675,10 @@ function summaryMarkdown(){
   });
   const unplaced=SIGNALS.filter(s=>pinOfSignal(s.id)==null).map(s=>s.id);
   if(unplaced.length) md+=`\n**Unplaced signals:** ${unplaced.join(", ")}\n`;
-  md+=`\n## Dev header (${headerCfg.rows}×${headerCfg.cols})\n\n| Pos | Net | Pin / note |\n|-----|-----|-----------|\n`;
+  md+=`\n## Dev header (${headerCfg.rows}×${headerCfg.cols}, PPPC062 numbering)\n\n| Header pin | Net | GPIO / note |\n|-----------|-----|-------------|\n`;
   headerCfg.slots.forEach((v,i)=>{
-    const info=headerSlotInfo(v), rl=String.fromCharCode(65+Math.floor(i/headerCfg.cols))+((i%headerCfg.cols)+1);
-    md+=`| ${rl} | ${v?info.label:"—"} | ${v?info.sub:""} |\n`;
+    const info=headerSlotInfo(v);
+    md+=`| ${i+1} | ${v?info.label:"—"} | ${v?info.sub:""} |\n`;
   });
   const {list}=validate();
   if(list.length){ md+=`\n## Validation\n\n`; list.forEach(x=>md+=`- ${x.level==="err"?"⛔":"⚠"} **${PIN[x.pin].name}** (pin ${x.pin}): ${x.text}\n`); }
