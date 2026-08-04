@@ -157,7 +157,7 @@
     <button id="btn-export">Export JSON</button>
     <button id="btn-import">Import JSON</button>
     <button id="btn-md">Copy summary</button>
-    <button id="btn-reset">Reset</button>
+    <button id="btn-reset">Reset to default</button>
   </div>
 </header>
 
@@ -320,6 +320,21 @@ let headerCfg = { rows:2, cols:6, slots:[
   "3V3","GND","I2C_SDA","I2C_SCL","SPI_SCK","SPI_MISO",
   "LED+","W-","C-","GND","SPI_MOSI","pin:15"
 ]};
+
+// Default layout loaded on a fresh browser (from delinkpinallocation.json). Once you make a
+// change it is saved to localStorage, and that saved copy is loaded on subsequent visits.
+const DEFAULT_CONFIG = {
+  version:3,
+  assignments:{
+    "4":"BUTTON_ADC_1","5":"LED_ACTIVATE","6":"PWM_LED","7":"COLOR_SEL","8":"SPI_MISO",
+    "9":"TP_INT","10":"TP_RST","11":"USB_STAT","12":"BAT_MONIT","15":"spare_gpio","16":"spare_gpio",
+    "17":"EPD_BUSY","18":"EPD_RST","19":"EPD_DC","20":"SPI_CS","21":"SPI_SCK","22":"SPI_MOSI",
+    "23":"I2C_SDA","24":"I2C_SCL","25":"PWR_BUTTON","26":"spare_gpio","31":"SD_DAT2","32":"SD_DAT3",
+    "33":"SD_CMD","34":"SD_CLK","35":"SD_DAT0","38":"SD_DAT1","39":"BUTTON_ADC_2"
+  },
+  header:{rows:2, cols:6, slots:["3V3","GND","I2C_SDA","I2C_SCL","SPI_SCK","SPI_MISO","LED+","W-","C-","GND","SPI_MOSI","pin:15"]}
+};
+const LS_KEY = "esp32s3-delink-alloc";
 
 function initState(){
   lockedDefault = {};
@@ -612,27 +627,35 @@ function renderAll(){
   hdrPinSet=headerPins();
   renderBoard(issues); renderDetail(issues); renderReq(); renderWarnings(list); renderAssignments(); renderHeader();
   ["adc","strap","safe"].forEach(k=>document.getElementById("hl-"+k).classList.toggle("active", highlight===k));
+  saveLocal();   // persist the current allocation + header to the browser
 }
 
-/* ======================= IMPORT / EXPORT / SUMMARY ======================= */
-function exportJSON(){
+/* ======================= CONFIG / PERSISTENCE / IMPORT / EXPORT ======================= */
+function currentConfig(){
   const assignments={};
   PINS.forEach(p=>{ if(!isLocked(p.pin) && state[p.pin]!=="unassigned") assignments[p.pin]=state[p.pin]; });
-  const data={module:"ESP32-S3-WROOM-1-N8R8", board:"de-link", tool:"esp32-s3-pin-allocator", version:3, assignments, header:headerCfg};
-  const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:"application/json"}));
+  return {module:"ESP32-S3-WROOM-1-N8R8", board:"de-link", tool:"esp32-s3-pin-allocator", version:3, assignments, header:headerCfg};
+}
+function applyConfig(cfg){
+  PINS.forEach(p=>{ if(!isLocked(p.pin)) state[p.pin]="unassigned"; });
+  const asg=(cfg&&cfg.assignments)||{};
+  Object.entries(asg).forEach(([pin,fn])=>{ const pn=Number(pin); if(PIN[pn]&&!isLocked(pn)&&FN[fn]) state[pn]=fn; });
+  if(cfg&&cfg.header&&Array.isArray(cfg.header.slots))
+    headerCfg={rows:cfg.header.rows||2, cols:cfg.header.cols||6, slots:cfg.header.slots.slice()};
+}
+function saveLocal(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(currentConfig())); }catch(e){} }
+function loadLocal(){ try{ const s=localStorage.getItem(LS_KEY); return s?JSON.parse(s):null; }catch(e){ return null; } }
+
+function exportJSON(){
+  const url=URL.createObjectURL(new Blob([JSON.stringify(currentConfig(),null,2)],{type:"application/json"}));
   const a=document.createElement("a"); a.href=url; a.download="delink-pin-allocation.json"; a.click(); URL.revokeObjectURL(url);
 }
 function importJSON(){
   const inp=document.createElement("input"); inp.type="file"; inp.accept="application/json,.json";
   inp.addEventListener("change",()=>{
     const f=inp.files[0]; if(!f) return; const r=new FileReader();
-    r.onload=()=>{ try{
-      const data=JSON.parse(r.result), asg=data.assignments||{};
-      PINS.forEach(p=>{ if(!isLocked(p.pin)) state[p.pin]="unassigned"; });
-      Object.entries(asg).forEach(([pin,fn])=>{ const pn=Number(pin); if(PIN[pn]&&!isLocked(pn)&&FN[fn]) state[pn]=fn; });
-      if(data.header && Array.isArray(data.header.slots)) headerCfg={rows:data.header.rows||2, cols:data.header.cols||6, slots:data.header.slots};
-      selected=null; renderAll();
-    }catch(e){ alert("Import failed: "+e.message); } };
+    r.onload=()=>{ try{ applyConfig(JSON.parse(r.result)); selected=null; renderAll(); }
+                   catch(e){ alert("Import failed: "+e.message); } };
     r.readAsText(f);
   });
   inp.click();
@@ -669,10 +692,11 @@ function flash(id,txt){ const b=document.getElementById(id),o=b.textContent; b.t
 document.getElementById("btn-export").onclick=exportJSON;
 document.getElementById("btn-import").onclick=importJSON;
 document.getElementById("btn-md").onclick=copySummary;
-document.getElementById("btn-reset").onclick=()=>{ if(confirm("Clear all editable assignments?")){ initState(); selected=null; renderAll(); } };
+document.getElementById("btn-reset").onclick=()=>{ if(confirm("Reset to the default de-link layout? Your current in-browser changes will be replaced (Export first if you want to keep them).")){ applyConfig(DEFAULT_CONFIG); selected=null; renderAll(); } };
 ["adc","strap","safe"].forEach(k=>document.getElementById("hl-"+k).onclick=()=>{ highlight=highlight===k?null:k; renderAll(); });
 
-initState();
+initState();                              // module-fixed + design-fixed locks, everything else blank
+applyConfig(loadLocal() || DEFAULT_CONFIG); // restore your last browser session, else the default layout
 renderAll();
 </script>
 </body>
