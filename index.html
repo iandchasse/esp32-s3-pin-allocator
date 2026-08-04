@@ -328,12 +328,13 @@ let headerCfg = { rows:2, cols:6, slots:[
 // change it is saved to localStorage, and that saved copy is loaded on subsequent visits.
 const DEFAULT_CONFIG = {
   version:3,
+  flipped:true,
   assignments:{
-    "4":"BUTTON_ADC_1","5":"LED_ACTIVATE","6":"PWM_LED","7":"COLOR_SEL","8":"SPI_MISO",
-    "9":"TP_INT","10":"TP_RST","11":"USB_STAT","12":"BAT_MONIT","15":"spare_gpio","16":"spare_gpio",
-    "17":"EPD_BUSY","18":"EPD_RST","19":"EPD_DC","20":"SPI_CS","21":"SPI_SCK","22":"SPI_MOSI",
-    "23":"I2C_SDA","24":"I2C_SCL","25":"PWR_BUTTON","26":"spare_gpio","31":"SD_DAT2","32":"SD_DAT3",
-    "33":"SD_CMD","34":"SD_CLK","35":"SD_DAT0","38":"SD_DAT1","39":"BUTTON_ADC_2"
+    "4":"BUTTON_ADC_2","5":"SD_DAT1","6":"SD_DAT0","7":"SD_CLK","8":"SD_CMD","9":"SD_DAT3",
+    "10":"SD_DAT2","11":"PWR_BUTTON","12":"BAT_MONIT","15":"spare_gpio","17":"USB_STAT",
+    "18":"TP_RST","19":"TP_INT","20":"SPI_MOSI","21":"SPI_SCK","22":"SPI_CS","23":"EPD_DC",
+    "24":"EPD_RST","25":"EPD_BUSY","31":"I2C_SDA","32":"I2C_SCL","33":"LED_ACTIVATE",
+    "34":"COLOR_SEL","35":"PWM_LED","38":"SPI_MISO","39":"BUTTON_ADC_1"
   },
   header:{rows:2, cols:6, slots:["3V3","GND","I2C_SDA","I2C_SCL","SPI_SCK","SPI_MISO","LED+","W-","C-","GND","SPI_MOSI","pin:15"]}
 };
